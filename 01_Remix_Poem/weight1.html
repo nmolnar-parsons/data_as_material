@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Remix Poem</title>
+        <style>
+            /* body text is centered*/
+            body {
+                text-align: center;
+                font-size: 14px;
+
+            }
+            
+            #poem {
+                display: inline-block;
+                text-align: center;
+            }
+            
+            /* scale font-size between 14px and 40px for both chunks,
+               adjust weights; transitions kept */
+            #poem div {
+                transition: font-weight 200ms ease, font-size 200ms ease;
+            }
+
+            /* lines 9→14: descending size 40→14 (line9 largest/heaviest) */
+            #line9  { font-weight: 900; font-size: 40px; }
+            #line10 { font-weight: 800; font-size: 34px; }
+            #line11 { font-weight: 700; font-size: 29px; }
+            #line12 { font-weight: 600; font-size: 24px; }
+            #line13 { font-weight: 500; font-size: 19px; }
+            #line14 { font-weight: 400; font-size: 14px; }
+
+            /* lines 17→28: ascending size 14→40 (line28 largest/heaviest) */
+            #line17 { font-weight: 400; font-size: 14px; }
+            #line18 { font-weight: 400; font-size: 16px; }
+            #line19 { font-weight: 500; font-size: 18px; }
+            #line20 { font-weight: 500; font-size: 20px; }
+            #line21 { font-weight: 600; font-size: 22px; }
+            #line22 { font-weight: 600; font-size: 24px; }
+            #line23 { font-weight: 700; font-size: 26px; }
+            #line24 { font-weight: 700; font-size: 28px; }
+            #line25 { font-weight: 800; font-size: 30px; }
+            #line26 { font-weight: 800; font-size: 32px; }
+            #line27 { font-weight: 900; font-size: 36px; }
+            #line28 { font-weight: 900; font-size: 40px; }
+            
+        </style>
+    </head>
+    <body>
+        <div id="poem">
+            <div id="line1">Bent double, like old beggars under sacks,</div>
+            <div id="line2">Knock-kneed, coughing like hags, we cursed through sludge,</div>
+            <div id="line3">Till on the haunting flares we turned our backs,</div>
+            <div id="line4">And towards our distant rest began to trudge.</div>
+            <div id="line5">Men marched asleep. Many had lost their boots,</div>
+            <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
+            <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
+            <div id="line8">Of gas-shells dropping softly behind.</div>
+            <br>
+            <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
+            <div id="line10">Fitting the clumsy helmets just in time;</div>
+            <div id="line11">But someone still was yelling out and stumbling</div>
+            <div id="line12">And flound'ring like a man in fire or lime.–</div>
+            <div id="line13">Dim, through the misty panes and thick green light,</div>
+            <div id="line14">As under a green sea, I saw him drowning.</div>
+            <br>
+            <div id="line15">In all my dreams, before my helpless sight,</div>
+            <div id="line16">He plunges at me, guttering, choking, drowning.</div>
+            <br>
+            <div id="line17">If in some smothering dreams you too could pace</div>
+            <div id="line18">Behind the wagon that we flung him in,</div>
+            <div id="line19">And watch the white eyes writhing in his face,</div>
+            <div id="line20">His hanging face, like a devil's sick of sin;</div>
+            <div id="line21">If you could hear, at every jolt, the blood</div>
+            <div id="line22">Come gargling from the froth-corrupted lungs,</div>
+            <div id="line23">Obscene as cancer, bitter as the cud</div>
+            <div id="line24">Of vile, incurable sores on innocent tongues,</div>
+            <div id="line25">My friend, you would not tell with such high zest</div>
+            <div id="line26">To children ardent for some desperate glory,</div>
+            <div id="line27">The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
+            <div id="line28"><span style="font-style: italic;">Pro patria mori.</span></div>
+        </div>
+    </body>
+</html>

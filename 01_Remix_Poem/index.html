@@ -5,48 +5,137 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Remix Poem</title>
         <style>
-            /* All class=broken divs get moved to the right of the screen */
-            .broken {
-                display: inline-block;
-                position: relative;
-                left: 400px;
+            body {
+                margin: 0;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+                display: flex;
+                gap: 40px;
             }
-
-
+            
+            #poem {
+                flex: 1;
+                text-align: left;
+                font-size: 16px;
+                max-width: 60%;
+            }
+            
+            #links {
+                flex: 0 0 300px;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .link-group {
+                border: 2px solid #333;
+                border-radius: 8px;
+                padding: 15px;
+                background-color: #f9f9f9;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .link-group h3 {
+                margin: 0 0 10px 0;
+                color: #333;
+                font-size: 18px;
+            }
+            
+            .link-group ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+            
+            .link-group li {
+                margin: 5px 0;
+            }
+            
+            .link-group a {
+                color: #0066cc;
+                text-decoration: none;
+                padding: 3px 6px;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+            
+            .link-group a:hover {
+                background-color: #e6f3ff;
+                text-decoration: underline;
+            }
         </style>
     </head>
     <body>
-        <h1>Ducle et Decorum Est</h1>
-        <div>Bent double, like old beggars under sacks,</div>
-        <div>Knock-kneed, coughing like hags, we cursed through sludge,</div>
-        <div>Till on the haunting flares we turned our backs,</div>
-        <div>And towards our distant rest began to trudge.</div>
-        <div>Men marched asleep. Many had lost their boots,</div>
-        <div>But limped on, blood-shod. All went lame; all blind;</div>
-        <div>Drunk with fatigue; deaf even to the hoots</div>
-        <div>Of gas-shells dropping softly behind.</div>
-        <br>
-        <div>Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
-        <div>Fitting the clumsy helmets just in time;</div>
-        <div>But someone still was yelling out and stumbling</div>
-        <div>And flound'ring like a man in fire or lime.–</div>
-        <div>Dim, through the misty panes and thick green light,</div>
-        <div>As under a green sea, I saw him drowning.</div>
-        <br>
-        <div>In all my dreams, before my helpless sight,</div>
-        <div>He plunges at me, guttering, choking, drowning.</div>
-        <br>
-        <div>If in some smothering dreams you too could pace</div>
-        <div>Behind the wagon that we flung him in,</div>
-        <div>And watch the white eyes writhing in his face,</div>
-        <div>His hanging face, <div class="broken">like a devil's sick of sin;</div></div>
-        <div>If you <div class="broken">could hear, at every jolt, the blood</div></div>
-        <div>Come <div class="broken">gargling from the froth-corrupted lungs,</div></div>
-        <div>Obscene as <div class="broken">cancer, bitter as the cud</div></div>
-        <div>Of vile, incurable sores on <div class="broken">innocent tongues,</div></div>
-        <div>My friend, you would not tell with such high zest</div>
-        <div>To children ardent for some desperate glory,</div>
-        <div>The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
-        <div><span style="font-style: italic;">Pro patria mori.</span></div>
+        <div id="poem">
+            <h2>Dulce et Decorum Est</h2>
+            <div id="line1">Bent double, like old beggars under sacks,</div>
+            <div id="line2">Knock-kneed, coughing like hags, we cursed through sludge,</div>
+            <div id="line3">Till on the haunting flares we turned our backs,</div>
+            <div id="line4">And towards our distant rest began to trudge.</div>
+            <div id="line5">Men marched asleep. Many had lost their boots,</div>
+            <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
+            <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
+            <div id="line8">Of gas-shells dropping softly behind.</div>
+            <br>
+            <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
+            <div id="line10">Fitting the clumsy helmets just in time;</div>
+            <div id="line11">But someone still was yelling out and stumbling</div>
+            <div id="line12">And flound'ring like a man in fire or lime.–</div>
+            <div id="line13">Dim, through the misty panes and thick green light,</div>
+            <div id="line14">As under a green sea, I saw him drowning.</div>
+            <br>
+            <div id="line15">In all my dreams, before my helpless sight,</div>
+            <div id="line16">He plunges at me, guttering, choking, drowning.</div>
+            <br>
+            <div id="line17">If in some smothering dreams you too could pace</div>
+            <div id="line18">Behind the wagon that we flung him in,</div>
+            <div id="line19">And watch the white eyes writhing in his face,</div>
+            <div id="line20">His hanging face, like a devil's sick of sin;</div>
+            <div id="line21">If you could hear, at every jolt, the blood</div>
+            <div id="line22">Come gargling from the froth-corrupted lungs,</div>
+            <div id="line23">Obscene as cancer, bitter as the cud</div>
+            <div id="line24">Of vile, incurable sores on innocent tongues,</div>
+            <div id="line25">My friend, you would not tell with such high zest</div>
+            <div id="line26">To children ardent for some desperate glory,</div>
+            <div id="line27">The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
+            <div id="line28"><span style="font-style: italic;">Pro patria mori.</span></div>
+        </div>
+        <div id="links">
+            <div class="link-group">
+                <h3>Explosion</h3>
+                <ul>
+                    <li><a href="explosion01.html">explosion01.html</a></li>
+                </ul>
+            </div>
+
+            <div class="link-group">
+                <h3>Map</h3>
+                <ul>
+                    <li><a href="map01.html">map01.html</a></li>
+                    <li><a href="map02.html">map02.html</a></li>
+                </ul>
+            </div>
+
+            <div class="link-group">
+                <h3>Rotation</h3>
+                <ul>
+                    <li><a href="rotation1.html">rotation1.html</a></li>
+                    <li><a href="rotation2.html">rotation2.html</a></li>
+                    <li><a href="rotation3.html">rotation3.html</a></li>
+                    <li><a href="rotation4.html">rotation4.html</a></li>
+                    <li><a href="rotation_extra.html">rotation_extra.html</a></li>
+                </ul>
+            </div>
+
+            <div class="link-group">
+                <h3>Weight</h3>
+                <ul>
+                    <li><a href="weight1.html">weight1.html</a></li>
+                    <li><a href="weight2.html">weight2.html</a></li>
+                    <li><a href="weight3.html">weight3.html</a></li>
+                    <li><a href="weight4.html">weight4.html</a></li>
+                </ul>
+            </div>
+        </div>
     </body>
 </html>

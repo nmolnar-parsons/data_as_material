@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Remix Poem</title>
+        <style>
+            /* body text is centered*/
+            body {
+                text-align: center;
+
+            }
+            
+            #poem {
+                display: block;
+                width: 100vw;
+                height: 100vh;
+                position: relative;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: serif;
+                overflow: hidden;
+            }
+
+            #poem div {
+                position: absolute;
+                white-space: nowrap;
+                transform-origin: left center;
+                line-height: 1;
+            }
+
+            @media (max-width: 768px) {
+                #poem {
+                    font-size: 10px;
+                }
+            }
+            
+        </style>
+    </head>
+    <body>
+        <div id="poem">
+            <div>Bent</div>
+            <div>double,</div>
+            <div>like</div>
+            <div>old</div>
+            <div>beggars</div>
+            <div>under</div>
+            <div>sacks,</div>
+            <div>Knock-kneed,</div>
+            <div>coughing</div>
+            <div>like</div>
+            <div>hags,</div>
+            <div>we</div>
+            <div>cursed</div>
+            <div>through</div>
+            <div>sludge,</div>
+            <div>Till</div>
+            <div>on</div>
+            <div>the</div>
+            <div>haunting</div>
+            <div>flares</div>
+            <div>we</div>
+            <div>turned</div>
+            <div>our</div>
+            <div>backs,</div>
+            <div>And</div>
+            <div>towards</div>
+            <div>our</div>
+            <div>distant</div>
+            <div>rest</div>
+            <div>began</div>
+            <div>to</div>
+            <div>trudge.</div>
+            <div>Men</div>
+            <div>marched</div>
+            <div>asleep.</div>
+            <div>Many</div>
+            <div>had</div>
+            <div>lost</div>
+            <div>their</div>
+            <div>boots,</div>
+            <div>But</div>
+            <div>limped</div>
+            <div>on,</div>
+            <div>blood-shod.</div>
+            <div>All</div>
+            <div>went</div>
+            <div>lame;</div>
+            <div>all</div>
+            <div>blind;</div>
+            <div>Drunk</div>
+            <div>with</div>
+            <div>fatigue;</div>
+            <div>deaf</div>
+            <div>even</div>
+            <div>to</div>
+            <div>the</div>
+            <div>hoots</div>
+            <div>Of</div>
+            <div>gas-shells</div>
+            <div>dropping</div>
+            <div>softly</div>
+            <div>behind.</div>
+            <div>Gas!</div>
+            <div>Gas!</div>
+            <div>Quick,</div>
+            <div>boys!</div>
+            <div>–</div>
+            <div>An</div>
+            <div>ecstasy</div>
+            <div>of</div>
+            <div>fumbling,</div>
+            <div>Fitting</div>
+            <div>the</div>
+            <div>clumsy</div>
+            <div>helmets</div>
+            <div>just</div>
+            <div>in</div>
+            <div>time;</div>
+            <div>But</div>
+            <div>someone</div>
+            <div>still</div>
+            <div>was</div>
+            <div>yelling</div>
+            <div>out</div>
+            <div>and</div>
+            <div>stumbling</div>
+            <div>And</div>
+            <div>flound'ring</div>
+            <div>like</div>
+            <div>a</div>
+            <div>man</div>
+            <div>in</div>
+            <div>fire</div>
+            <div>or</div>
+            <div>lime.–</div>
+            <div>Dim,</div>
+            <div>through</div>
+            <div>the</div>
+            <div>misty</div>
+            <div>panes</div>
+            <div>and</div>
+            <div>thick</div>
+            <div>green</div>
+            <div>light,</div>
+            <div>As</div>
+            <div>under</div>
+            <div>a</div>
+            <div>green</div>
+            <div>sea,</div>
+            <div>I</div>
+            <div>saw</div>
+            <div>him</div>
+            <div>drowning.</div>
+            <div>In</div>
+            <div>all</div>
+            <div>my</div>
+            <div>dreams,</div>
+            <div>before</div>
+            <div>my</div>
+            <div>helpless</div>
+            <div>sight,</div>
+            <div>He</div>
+            <div>plunges</div>
+            <div>at</div>
+            <div>me,</div>
+            <div>guttering,</div>
+            <div>choking,</div>
+            <div>drowning.</div>
+            <div>If</div>
+            <div>in</div>
+            <div>some</div>
+            <div>smothering</div>
+            <div>dreams</div>
+            <div>you</div>
+            <div>too</div>
+            <div>could</div>
+            <div>pace</div>
+            <div>Behind</div>
+            <div>the</div>
+            <div>wagon</div>
+            <div>that</div>
+            <div>we</div>
+            <div>flung</div>
+            <div>him</div>
+            <div>in,</div>
+            <div>And</div>
+            <div>watch</div>
+            <div>the</div>
+            <div>white</div>
+            <div>eyes</div>
+            <div>writhing</div>
+            <div>in</div>
+            <div>his</div>
+            <div>face,</div>
+            <div>His</div>
+            <div>hanging</div>
+            <div>face,</div>
+            <div>like</div>
+            <div>a</div>
+            <div>devil's</div>
+            <div>sick</div>
+            <div>of</div>
+            <div>sin;</div>
+            <div>If</div>
+            <div>you</div>
+            <div>could</div>
+            <div>hear,</div>
+            <div>at</div>
+            <div>every</div>
+            <div>jolt,</div>
+            <div>the</div>
+            <div>blood</div>
+            <div>Come</div>
+            <div>gargling</div>
+            <div>from</div>
+            <div>the</div>
+            <div>froth-corrupted</div>
+            <div>lungs,</div>
+            <div>Obscene</div>
+            <div>as</div>
+            <div>cancer,</div>
+            <div>bitter</div>
+            <div>as</div>
+            <div>the</div>
+            <div>cud</div>
+            <div>Of</div>
+            <div>vile,</div>
+            <div>incurable</div>
+            <div>sores</div>
+            <div>on</div>
+            <div>innocent</div>
+            <div>tongues,</div>
+            <div>My</div>
+            <div>friend,</div>
+            <div>you</div>
+            <div>would</div>
+            <div>not</div>
+            <div>tell</div>
+            <div>with</div>
+            <div>such</div>
+            <div>high</div>
+            <div>zest</div>
+            <div>To</div>
+            <div>children</div>
+            <div>ardent</div>
+            <div>for</div>
+            <div>some</div>
+            <div>desperate</div>
+            <div>glory,</div>
+            <div>The</div>
+            <div>old</div>
+            <div>Lie:</div>
+            <div><span style="font-style: italic;">Dulce</span></div>
+            <div><span style="font-style: italic;">et</span></div>
+            <div><span style="font-style: italic;">decorum</span></div>
+            <div><span style="font-style: italic;">est</span></div>
+            <div><span style="font-style: italic;">Pro patria mori.</span></div>
+
+        </div>
+
+        <script>
+            const lines = document.querySelectorAll('#poem div');
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // Square spiral parameters
+            const stepSize = 50; // distance between words
+            
+            // Calculate spiral positions for all words first
+            const positions = [];
+            let x = centerX;
+            let y = centerY;
+            let direction = 0; // Start at 12 o'clock (3=up, then 0=right, 1=down, 2=left)
+            let stepsInDirection = 1;
+            let stepCount = 0;
+            let sideCount = 0;
+            
+            // Generate all positions starting from 12 o'clock, moving clockwise
+            for (let i = 0; i < lines.length; i++) {
+                positions.push({ x, y, rotation: direction * 90 });
+                
+                // Move to next position (clockwise from 12: up->right->down->left)
+                switch(direction) {
+                    case 3: y -= stepSize; break; // up (12 o'clock)
+                    case 0: x += stepSize; break; // right (3 o'clock)
+                    case 1: y += stepSize; break; // down (6 o'clock)
+                    case 2: x -= stepSize; break; // left (9 o'clock)
+                }
+                
+                stepCount++;
+                
+                if (stepCount >= stepsInDirection) {
+                    direction = (direction + 1) % 4; // clockwise rotation
+                    stepCount = 0;
+                    sideCount++;
+                    
+                    if (sideCount % 2 === 0) {
+                        stepsInDirection++;
+                    }
+                }
+            }
+            
+            // Apply positions in reverse order so last word is in center
+            lines.forEach((line, index) => {
+                const pos = positions[positions.length - 1 - index];
+                
+                line.style.left = pos.x + 'px';
+                line.style.top = pos.y + 'px';
+                line.style.transform = `rotate(${pos.rotation}deg)`;
+            });
+        </script>
+    </body>
+</html>

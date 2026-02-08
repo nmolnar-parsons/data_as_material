@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Remix Poem</title>
+        <style>
+            /* body text is centered*/
+            body {
+                text-align: center;
+
+            }
+        
+            #poem {
+                display: block;
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                position: relative;
+            }
+
+            .poem-svg {
+                width: 100%;
+                height: 100%;
+            }
+
+            .arc-text {
+                font-family: serif;
+                font-size: 2px;
+                fill: black;
+            }
+                 
+        </style>
+    </head>
+    <body>
+        <div id="poem">
+            <svg class="poem-svg" viewBox="0 0 100 100">
+                <defs id="arc-paths"></defs>
+                <g id="curved-text"></g>
+            </svg>
+        </div>
+
+        <script>
+            const lines = [
+                // Block 1 (outermost)
+                { text: "Bent double, like old beggars under sacks,", block: 1 },
+                { text: "Knock-kneed, coughing like hags, we cursed through sludge,", block: 1 },
+                { text: "Till on the haunting flares we turned our backs,", block: 1 },
+                { text: "And towards our distant rest began to trudge.", block: 1 },
+                { text: "Men marched asleep. Many had lost their boots,", block: 1 },
+                { text: "But limped on, blood-shod. All went lame; all blind;", block: 1 },
+                { text: "Drunk with fatigue; deaf even to the hoots", block: 1 },
+                { text: "Of gas-shells dropping softly behind.", block: 1 },
+                
+                // Block 2 (middle)
+                { text: "Gas! Gas! Quick, boys! – An ecstasy of fumbling,", block: 2 },
+                { text: "Fitting the clumsy helmets just in time;", block: 2 },
+                { text: "But someone still was yelling out and stumbling", block: 2 },
+                { text: "And flound'ring like a man in fire or lime.–", block: 2 },
+                { text: "Dim, through the misty panes and thick green light,", block: 2 },
+                { text: "As under a green sea, I saw him drowning.", block: 2 },
+                { text: "In all my dreams, before my helpless sight,", block: 2 },
+                { text: "He plunges at me, guttering, choking, drowning.", block: 2 },
+                
+                // Block 3 (innermost)
+                { text: "If in some smothering dreams you too could pace", block: 3 },
+                { text: "Behind the wagon that we flung him in,", block: 3 },
+                { text: "And watch the white eyes writhing in his face,", block: 3 },
+                { text: "His hanging face, like a devil's sick of sin;", block: 3 },
+                { text: "If you could hear, at every jolt, the blood", block: 3 },
+                { text: "Come gargling from the froth-corrupted lungs,", block: 3 },
+                { text: "Obscene as cancer, bitter as the cud", block: 3 },
+                { text: "Of vile, incurable sores on innocent tongues,", block: 3 },
+                { text: "My friend, you would not tell with such high zest", block: 3 },
+                { text: "To children ardent for some desperate glory,", block: 3 },
+                { text: "The old Lie: Dulce et decorum est", block: 3 },
+                { text: "Pro patria mori.", block: 3 }
+            ];
+
+            const radii = { 1: 35, 2: 25, 3: 15 };
+            const center = 50;
+            
+            const pathsDef = document.getElementById('arc-paths');
+            const textGroup = document.getElementById('curved-text');
+            
+            // Track cumulative angles for each block to prevent overlap
+            const blockAngles = { 1: 0, 2: 0, 3: 0 };
+            
+            lines.forEach((line, i) => {
+                const radius = radii[line.block];
+                
+                // Calculate text arc length based on character count and font size
+                const charWidth = 0.15; // approximate character width in SVG units
+                const textLength = line.text.length * charWidth;
+                const arcLength = (textLength / radius) * (180 / Math.PI); // convert to degrees
+                const padding = 3; // degrees of padding between lines
+                
+                // Use cumulative angle for this block
+                const startAngle = blockAngles[line.block];
+                blockAngles[line.block] += arcLength + padding;
+                
+                // Create circular path
+                const pathId = `arc-${i}`;
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                
+                const angle1 = (startAngle - 90) * Math.PI / 180; // start at top
+                const angle2 = (startAngle + arcLength - 90) * Math.PI / 180;
+                
+                const startX = center + radius * Math.cos(angle1);
+                const startY = center + radius * Math.sin(angle1);
+                const endX = center + radius * Math.cos(angle2);
+                const endY = center + radius * Math.sin(angle2);
+                
+                const largeArcFlag = arcLength > 180 ? 1 : 0;
+                
+                path.setAttribute('id', pathId);
+                path.setAttribute('d', `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`);
+                path.setAttribute('fill', 'none');
+                pathsDef.appendChild(path);
+                
+                // Create text on path
+                const textPath = document.createElementNS('http://www.w3.org/2000/svg', 'textPath');
+                textPath.setAttribute('href', `#${pathId}`);
+                textPath.setAttribute('startOffset', '50%');
+                textPath.setAttribute('text-anchor', 'middle');
+                textPath.textContent = line.text;
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.classList.add('arc-text', `block${line.block}-text`);
+                text.appendChild(textPath);
+                
+                textGroup.appendChild(text);
+            });
+        </script>
+    </body>
+</html>

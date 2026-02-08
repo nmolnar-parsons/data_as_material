@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Remix Poem</title>
+        <style>
+            /* body text is centered*/
+            body {
+                text-align: center;
+                position: relative;
+                height: 100vh;
+                margin: 0;
+                overflow: visible;
+            }
+            
+            #poem {
+                /* make the container span the viewport so children positioned with vw/vh center correctly */
+                display: block;
+                width: 100%;
+                height: 100vh;
+                text-align: left;
+                position: relative;
+            }
+            
+            /* pivot at left-center, place at viewport center; shorter radius so text is closer to origin */
+            #poem > div {
+                position: absolute;
+                left: 50vw;
+                top: 50vh;
+                transform-origin: 0 50%;
+                /* white-space: nowrap; */
+                font-size: clamp(12px, 2vh, 18px);
+            }
+            
+            /* reduced, responsive radius */
+            #line1  { transform: rotate(-90.00deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line2  { transform: rotate(-77.14deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line3  { transform: rotate(-64.29deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line4  { transform: rotate(-51.43deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line5  { transform: rotate(-38.57deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line6  { transform: rotate(-25.71deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line7  { transform: rotate(-12.86deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line8  { transform: rotate(0.00deg)   translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line9  { transform: rotate(12.86deg)  translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line10 { transform: rotate(25.71deg)  translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line11 { transform: rotate(38.57deg)  translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line12 { transform: rotate(51.43deg)  translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line13 { transform: rotate(64.29deg)  translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line14 { transform: rotate(77.14deg)  translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line15 { transform: rotate(90.00deg)  translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line16 { transform: rotate(102.86deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line17 { transform: rotate(115.71deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line18 { transform: rotate(128.57deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line19 { transform: rotate(141.43deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line20 { transform: rotate(154.29deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line21 { transform: rotate(167.14deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line22 { transform: rotate(180.00deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line23 { transform: rotate(192.86deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line24 { transform: rotate(205.71deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line25 { transform: rotate(218.57deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line26 { transform: rotate(231.43deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line27 { transform: rotate(244.29deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+            #line28 { transform: rotate(257.14deg) translateX(clamp(6vh,10vh,14vh)) translateY(-50%); }
+        </style>
+    </head>
+    <body>
+        <div id="poem">
+            <div id="line1"><span style="font-weight: bold;">Bent double,</span> like old beggars under sacks,</div>
+            <div id="line2">Knock-kneed, coughing like hags, we cursed through sludge,</div>
+            <div id="line3">Till on the haunting flares we turned our backs,</div>
+            <div id="line4">And towards our distant rest began to trudge.</div>
+            <div id="line5">Men marched asleep. Many had lost their boots,</div>
+            <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
+            <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
+            <div id="line8">Of gas-shells dropping softly behind.</div>
+            <br>
+            <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
+            <div id="line10">Fitting the clumsy helmets just in time;</div>
+            <div id="line11">But someone still was yelling out and stumbling</div>
+            <div id="line12">And flound'ring like a man in fire or lime.–</div>
+            <div id="line13">Dim, through the misty panes and thick green light,</div>
+            <div id="line14">As under a green sea, I saw him drowning.</div>
+            <br>
+            <div id="line15">In all my dreams, before my helpless sight,</div>
+            <div id="line16">He plunges at me, guttering, choking, drowning.</div>
+            <br>
+            <div id="line17">If in some smothering dreams you too could pace</div>
+            <div id="line18">Behind the wagon that we flung him in,</div>
+            <div id="line19">And watch the white eyes writhing in his face,</div>
+            <div id="line20">His hanging face, like a devil's sick of sin;</div>
+            <div id="line21">If you could hear, at every jolt, the blood</div>
+            <div id="line22">Come gargling from the froth-corrupted lungs,</div>
+            <div id="line23">Obscene as cancer, bitter as the cud</div>
+            <div id="line24">Of vile, incurable sores on innocent tongues,</div>
+            <div id="line25">My friend, you would not tell with such high zest</div>
+            <div id="line26">To children ardent for some desperate glory,</div>
+            <div id="line27">The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
+            <div id="line28"><span style="font-style: italic;">Pro patria mori.</span></div>
+        </div>
+    </body>
+</html>
