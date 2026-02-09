@@ -9,54 +9,258 @@
             /* body text is centered */
             body {
                 text-align: center;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Increased minmax to spread words */
+                grid-auto-rows: minmax(100px, 1fr); /* Increased row height */
+                height: 100vh;
+                width: 100vw;
+                margin-top: 100px;
             }
 
             #poem {
-                margin-top: 100px;
-                margin-left: 150px;
-                
+                display: contents; /* Ensures the grid applies directly to the words */
             }
 
-
+            #poem div {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem; /* Slightly larger font size */
+            }
 
         </style>
     </head>
     <body>
         <div class="sidebar">
-            <p>Space4: </p>
+            <p>Space4: Grid</p>
             <a href="index.html">home</a>
             <a href="space3.html">previous</a>
             <a href="clarity1.html">next</a>
         </div>
-            <div id="poem">
-            <div id="line1" class="line">Bent double, like old beggars under sacks,</div>
-            <div id="line2" class="line">Knock-kneed, coughing like hags, we cursed through sludge,</div>
-            <div id="line3" class="line">Till on the haunting flares we turned our backs,</div>
-            <div id="line4" class="line">And towards our distant rest began to trudge.</div>
-            <div id="line5" class="line">Men marched asleep. Many had lost their boots,</div>
-            <div id="line6" class="line">But limped on, blood-shod. All went lame; all blind;</div>
-            <div id="line7" class="line">Drunk with fatigue; deaf even to the hoots</div>
-            <div id="line8" class="line">Of gas-shells dropping softly behind.</div>
-            <div id="line9" class="line">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
-            <div id="line10" class="line">Fitting the clumsy helmets just in time;</div>
-            <div id="line11" class="line">But someone still was yelling out and stumbling</div>
-            <div id="line12" class="line">And flound'ring like a man in fire or lime.–</div>
-            <div id="line13" class="line">Dim, through the misty panes and thick green light,</div>
-            <div id="line14" class="line">As under a green sea, I saw him drowning.</div>
-            <div id="line15" class="line">In all my dreams, before my helpless sight,</div>
-            <div id="line16" class="line">He plunges at me, guttering, choking, drowning.</div>
-            <div id="line17" class="line">If in some smothering dreams you too could pace</div>
-            <div id="line18" class="line">Behind the wagon that we flung him in,</div>
-            <div id="line19" class="line">And watch the white eyes writhing in his face,</div>
-            <div id="line20" class="line">His hanging face, like a devil's sick of sin;</div>
-            <div id="line21" class="line">If you could hear, at every jolt, the blood</div>
-            <div id="line22" class="line">Come gargling from the froth-corrupted lungs,</div>
-            <div id="line23" class="line">Obscene as cancer, bitter as the cud</div>
-            <div id="line24" class="line">Of vile, incurable sores on innocent tongues,</div>
-            <div id="line25" class="line">My friend, you would not tell with such high zest</div>
-            <div id="line26" class="line">To children ardent for some desperate glory,</div>
-            <div id="line27" class="line">The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
-            <div id="line28" class="line"><span style="font-style: italic;">Pro patria mori.</span></div>
+        <div id="poem">
+            <div>Bent</div>
+            <div>double,</div>
+            <div>like</div>
+            <div>old</div>
+            <div>beggars</div>
+            <div>under</div>
+            <div>sacks,</div>
+            <div>Knock</div>
+            <div>-kneed,</div>
+            <div>coughing</div>
+            <div>like</div>
+            <div>hags,</div>
+            <div>we</div>
+            <div>cursed</div>
+            <div>through</div>
+            <div>sludge,</div>
+            <div>Till</div>
+            <div>on</div>
+            <div>the</div>
+            <div>haunting</div>
+            <div>flares</div>
+            <div>we</div>
+            <div>turned</div>
+            <div>our</div>
+            <div>backs,</div>
+            <div>And</div>
+            <div>towards</div>
+            <div>our</div>
+            <div>distant</div>
+            <div>rest</div>
+            <div>began</div>
+            <div>to</div>
+            <div>trudge.</div>
+            <div>Men</div>
+            <div>marched</div>
+            <div>asleep.</div>
+            <div>Many</div>
+            <div>had</div>
+            <div>lost</div>
+            <div>their</div>
+            <div>boots,</div>
+            <div>But</div>
+            <div>limped</div>
+            <div>on,</div>
+            <div>blood-</div>
+            <div>shod.</div>
+            <div>All</div>
+            <div>went</div>
+            <div>lame;</div>
+            <div>all</div>
+            <div>blind;</div>
+            <div>Drunk</div>
+            <div>with</div>
+            <div>fatigue;</div>
+            <div>deaf</div>
+            <div>even</div>
+            <div>to</div>
+            <div>the</div>
+            <div>hoots</div>
+            <div>Of</div>
+            <div>gas</div>
+            <div>-shells</div>
+            <div>dropping</div>
+            <div>softly</div>
+            <div>behind.</div>
+            <div>Gas!</div>
+            <div>Gas!</div>
+            <div>Quick,</div>
+            <div>boys!</div>
+            <div>–</div>
+            <div>An</div>
+            <div>ecstasy</div>
+            <div>of</div>
+            <div>fumbling,</div>
+            <div>Fitting</div>
+            <div>the</div>
+            <div>clumsy</div>
+            <div>helmets</div>
+            <div>just</div>
+            <div>in</div>
+            <div>time;</div>
+            <div>But</div>
+            <div>someone</div>
+            <div>still</div>
+            <div>was</div>
+            <div>yelling</div>
+            <div>out</div>
+            <div>and</div>
+            <div>stumbling</div>
+            <div>And</div>
+            <div>flound'ring</div>
+            <div>like</div>
+            <div>a</div>
+            <div>man</div>
+            <div>in</div>
+            <div>fire</div>
+            <div>or</div>
+            <div>lime.–</div>
+            <div>Dim,</div>
+            <div>through</div>
+            <div>the</div>
+            <div>misty</div>
+            <div>panes</div>
+            <div>and</div>
+            <div>thick</div>
+            <div>green</div>
+            <div>light,</div>
+            <div>As</div>
+            <div>under</div>
+            <div>a</div>
+            <div>green</div>
+            <div>sea,</div>
+            <div>I</div>
+            <div>saw</div>
+            <div>him</div>
+            <div>drowning.</div>
+            <div>In</div>
+            <div>all</div>
+            <div>my</div>
+            <div>dreams,</div>
+            <div>before</div>
+            <div>my</div>
+            <div>helpless</div>
+            <div>sight,</div>
+            <div>He</div>
+            <div>plunges</div>
+            <div>at</div>
+            <div>me,</div>
+            <div>guttering,</div>
+            <div>choking,</div>
+            <div>drowning.</div>
+            <div>If</div>
+            <div>in</div>
+            <div>some</div>
+            <div>smothering</div>
+            <div>dreams</div>
+            <div>you</div>
+            <div>too</div>
+            <div>could</div>
+            <div>pace</div>
+            <div>Behind</div>
+            <div>the</div>
+            <div>wagon</div>
+            <div>that</div>
+            <div>we</div>
+            <div>flung</div>
+            <div>him</div>
+            <div>in,</div>
+            <div>And</div>
+            <div>watch</div>
+            <div>the</div>
+            <div>white</div>
+            <div>eyes</div>
+            <div>writhing</div>
+            <div>in</div>
+            <div>his</div>
+            <div>face,</div>
+            <div>His</div>
+            <div>hanging</div>
+            <div>face,</div>
+            <div>like</div>
+            <div>a</div>
+            <div>devil's</div>
+            <div>sick</div>
+            <div>of</div>
+            <div>sin;</div>
+            <div>If</div>
+            <div>you</div>
+            <div>could</div>
+            <div>hear,</div>
+            <div>at</div>
+            <div>every</div>
+            <div>jolt,</div>
+            <div>the</div>
+            <div>blood</div>
+            <div>Come</div>
+            <div>gargling</div>
+            <div>from</div>
+            <div>the</div>
+            <div>froth-</div>
+            <div>corrupted</div>
+            <div>lungs,</div>
+            <div>Obscene</div>
+            <div>as</div>
+            <div>cancer,</div>
+            <div>bitter</div>
+            <div>as</div>
+            <div>the</div>
+            <div>cud</div>
+            <div>Of</div>
+            <div>vile,</div>
+            <div>incurable</div>
+            <div>sores</div>
+            <div>on</div>
+            <div>innocent</div>
+            <div>tongues,</div>
+            <div>My</div>
+            <div>friend,</div>
+            <div>you</div>
+            <div>would</div>
+            <div>not</div>
+            <div>tell</div>
+            <div>with</div>
+            <div>such</div>
+            <div>high</div>
+            <div>zest</div>
+            <div>To</div>
+            <div>children</div>
+            <div>ardent</div>
+            <div>for</div>
+            <div>some</div>
+            <div>desperate</div>
+            <div>glory,</div>
+            <div>The</div>
+            <div>old</div>
+            <div>Lie:</div>
+            <div><span style="font-style: italic;">Dulce</span></div>
+            <div><span style="font-style: italic;">et</span></div>
+            <div><span style="font-style: italic;">decorum</span></div>
+            <div><span style="font-style: italic;">est</span></div>
+            <div><span style="font-style: italic;">Pro </span></div>
+            <div><span style="font-style: italic;">patria</span></div>
+            <div><span style="font-style: italic;">mori.</span></div>
         </div>
     </body>
 </html>
