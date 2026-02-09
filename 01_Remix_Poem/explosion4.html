@@ -6,40 +6,59 @@
         <title>Remix Poem</title>
         <link rel="stylesheet" href="style.css">
         <style>
-            /* body text is centered */
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
 
-            
             #poem {
-                display: flex;
-                width: 100vw; /* Ensure text uses full viewport width */
-                flex-wrap: wrap;
-                justify-content: space-evenly;
+                position: relative;
+                width: 100vw;
+                height: 100vh;
             }
 
-            /* Stretch lines to fill 99vw using letter spacing */
-            #poem > div {
-                letter-spacing: 1.2vw; /* Adjust spacing to stretch text */
-                text-align: justify;
+            #poem div {
+                position: absolute;
+                white-space: nowrap;
             }
 
-            /* Center "Gas! Gas!" and fix it in place */
-            #gas {
-                font-size: 200px;
-                width: 100vw; /* Ensure it spans the full width of the viewport */
-                text-align: center; /* Center the text horizontally */
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 10; /* Ensure it stays above other content */
-            }
+            #line1 { left: 15vw; top: 8vh; }
+            #line2 { left: 62vw; top: 23vh; }
+            #line3 { left: 8vw; top: 71vh; }
+            #line4 { left: 45vw; top: 5vh; }
+            #line5 { left: 72vw; top: 88vh; }
+            #line6 { left: 28vw; top: 42vh; }
+            #line7 { left: 5vw; top: 55vh; }
+            #line8 { left: 83vw; top: 12vh; }
+            #line9 { left: 38vw; top: 78vh; }
+            #line10 { left: 67vw; top: 35vh; }
+            #line11 { left: 12vw; top: 92vh; }
+            #line12 { left: 54vw; top: 18vh; }
+            #line13 { left: 25vw; top: 65vh; }
+            #line14 { left: 78vw; top: 48vh; }
+            #line15 { left: 42vw; top: 28vh; }
+            #line16 { left: 9vw; top: 15vh; }
+            #line17 { left: 63vw; top: 82vh; }
+            #line18 { left: 31vw; top: 52vh; }
+            #line19 { left: 85vw; top: 38vh; }
+            #line20 { left: 18vw; top: 75vh; }
+            #line21 { left: 51vw; top: 9vh; }
+            #line22 { left: 7vw; top: 45vh; }
+            #line23 { left: 69vw; top: 62vh; }
+            #line24 { left: 35vw; top: 85vh; }
+            #line25 { left: 76vw; top: 25vh; }
+            #line26 { left: 22vw; top: 58vh; }
+            #line27 { left: 48vw; top: 32vh; }
+            #line28 { left: 14vw; top: 68vh; }
         </style>
     </head>
     <body>
         <div class="sidebar">
             <p>Sidebar content here</p>
             <a href="index.html">home</a>
-            <a href="weight2.html">previous</a>
-            <a href="weight4.html">next</a>
+            <a href="explosion3.html">previous</a>
+            <a href="weight1.html">next</a>
         </div>
         <div id="poem">
             <div id="line1">Bent double, like old beggars under sacks,</div>
@@ -50,15 +69,17 @@
             <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
             <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
             <div id="line8">Of gas-shells dropping softly behind.</div>
-            <div id="line9"><span id="gas">Gas! Gas!</span></div>
-            <div id="line9b">Quick, boys! – An ecstasy of fumbling,</div>
+            <br>
+            <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
             <div id="line10">Fitting the clumsy helmets just in time;</div>
             <div id="line11">But someone still was yelling out and stumbling</div>
             <div id="line12">And flound'ring like a man in fire or lime.–</div>
             <div id="line13">Dim, through the misty panes and thick green light,</div>
             <div id="line14">As under a green sea, I saw him drowning.</div>
+            <br>
             <div id="line15">In all my dreams, before my helpless sight,</div>
             <div id="line16">He plunges at me, guttering, choking, drowning.</div>
+            <br>
             <div id="line17">If in some smothering dreams you too could pace</div>
             <div id="line18">Behind the wagon that we flung him in,</div>
             <div id="line19">And watch the white eyes writhing in his face,</div>

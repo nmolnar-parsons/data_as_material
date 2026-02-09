@@ -1,0 +1,23 @@
+body {
+    text-align: center;
+}
+
+#poem {
+    display: inline-block;
+    text-align: left;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 70px;
+    background-color: #f0f0f0;
+    padding: 20px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+    font-size: 10px;
+    line-height: 1.5;
+ 
+}

@@ -4,65 +4,84 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Remix Poem</title>
+        <link rel="stylesheet" href="style.css">
         <style>
             /* body text is centered*/
             body {
                 text-align: center;
+                font-family: 'Times New Roman', Times, serif;
 
             }
             
             #poem {
+                margin-top: 100px;
                 display: inline-block;
                 text-align: left;
             }
 
-            .french {
-                color: red;
+            .english {
+                position: relative;
+                left: -400px;
+                font-weight: bold;
             }
             
-            .english {
-                color: blue;
+
+            .french {
+                position: relative;
+                left: 50px;
+                font-size: 12px;
+
             }
+            
 
             .latin {
-                color: green;
+                position: relative;
+                left: 550px;
+                font-weight: lighter;
+                font-size: 10px;
             }
             
         </style>
     </head>
     <body>
+        <div class="sidebar">
+            <p>Sidebar content here</p>
+            <a href="index.html">home</a>
+            <a href="weight3.html">previous</a>
+            <a href="map1.html">next</a>
+        </div>
         <div id="poem">
-            <div id="line1"><span class="english">Bent</span> <span class="latin">double</span>, <span class="english">like</span> <span class="english">old</span> <span class="french">beggars</span> <span class="english">under</span> <span class="english">sacks</span>,</div>
-            <div id="line2"><span class="english">Knock</span>-<span class="english">kneed</span>, <span class="english">coughing</span> <span class="english">like</span> <span class="english">hags</span>, <span class="english">we</span> <span class="english">cursed</span> <span class="english">through</span> <span class="english">sludge</span>,</div>
-            <div id="line3"><span class="english">Till</span> <span class="english">on</span> the <span class="french">haunting</span> <span class="french">flares</span> <span class="english">we</span> <span class="english">turned</span> <span class="english">our</span> <span class="english">backs</span>,</div>
-            <div id="line4"><span class="english">And</span> <span class="latin">towards</span> <span class="english">our</span> <span class="latin">distant</span> <span class="english">rest</span> <span class="latin">began</span> <span class="english">to</span> <span class="english">trudge</span>.</div>
-            <div id="line5"><span class="english">Men</span> <span class="french">marched</span> <span class="english">asleep</span>. <span class="english">Many</span> <span class="english">had</span> <span class="english">lost</span> <span class="english">their</span> <span class="french">boots</span>,</div>
-            <div id="line6"><span class="english">But</span> <span class="english">limped</span> <span class="english">on</span>, <span class="english">blood-shod</span>. <span class="english">All</span> <span class="english">went</span> <span class="english">lame</span>; <span class="english">all</span> <span class="english">blind</span>;</div>
-            <div id="line7"><span class="english">Drunk</span> <span class="english">with</span> <span class="french">fatigue</span>; <span class="english">deaf</span> <span class="english">even</span> <span class="english">to</span> <span class="english">the</span> <span class="english">hoots</span></div>
-            <div id="line8"><span class="english">Of</span> <span class="latin">gas</span>-<span class="french">shells</span> <span class="english">dropping</span> <span class="english">softly</span> <span class="english">behind</span>.</div>
+            <div id="line1"><span class="english">Bent</span> <span class="latin">double,</span> <span class="english">like</span> <span class="english">old</span> <span class="french">beggars</span> <span class="english">under</span> <span class="english">sacks,</span></div>
+            <div id="line2"><span class="english">Knock-</span><span class="english">kneed,</span> <span class="english">coughing</span> <span class="english">like</span> <span class="english">hags,</span> <span class="english">we</span> <span class="english">cursed</span> <span class="english">through</span> <span class="english">sludge,</span></div>
+            <div id="line3"><span class="english">Till</span> <span class="english">on the</span>  <span class="french">haunting</span> <span class="french">flares</span> <span class="english">we</span> <span class="english">turned</span> <span class="english">our</span> <span class="english">backs,</span></div>
+            <div id="line4"><span class="english">And</span> <span class="latin">towards</span> <span class="english">our</span> <span class="latin">distant</span> <span class="english">rest</span> <span class="latin">began</span> <span class="english">to</span> <span class="english">trudge.</span></div>
+            <div id="line5"><span class="english">Men</span> <span class="french">marched</span> <span class="english">asleep.</span> <span class="english">Many</span> <span class="english">had</span> <span class="english">lost</span> <span class="english">their</span> <span class="french">boots,</span></div>
+            <div id="line6"><span class="english">But</span> <span class="english">limped</span> <span class="english">on,</span> <span class="english">blood-shod.</span> <span class="english">All</span> <span class="english">went</span> <span class="english">lame;</span> <span class="english">all</span> <span class="english">blind;</span></div>
+            <div id="line7"><span class="english">Drunk</span> <span class="english">with</span> <span class="french">fatigue;</span> <span class="english">deaf</span> <span class="english">even</span> <span class="english">to</span> <span class="english">the</span> <span class="english">hoots</span></div>
+            <div id="line8"><span class="english">Of</span> <span class="latin">gas-</span><span class="french">shells</span> <span class="english">dropping</span> <span class="english">softly</span> <span class="english">behind.</span></div>
             <br>
-            <div id="line9"><span class="latin">Gas</span>! <span class="latin">Gas</span>! <span class="english">Quick</span>, <span class="english">boys</span>! – <span class="latin">An</span> <span class="latin">ecstasy</span> <span class="english">of</span> <span class="english">fumbling</span>,</div>
-            <div id="line10"><span class="english">Fitting</span> <span class="english">the</span> <span class="french">clumsy</span> <span class="french">helmets</span> <span class="english">just</span> <span class="english">in</span> <span class="english">time</span>;</div>
+            <div id="line9"><span class="latin">Gas!</span> <span class="latin">Gas!</span> <span class="english">Quick,</span> <span class="english">boys!–</span> <span class="latin">An</span> <span class="latin">ecstasy</span> <span class="english">of</span> <span class="english">fumbling,</span></div>
+            <div id="line10"><span class="english">Fitting</span> <span class="english">the</span> <span class="french">clumsy</span> <span class="french">helmets</span> <span class="english">just</span> <span class="english">in</span> <span class="english">time;</span></div>
             <div id="line11"><span class="english">But</span> <span class="english">someone</span> <span class="english">still</span> <span class="english">was</span> <span class="english">yelling</span> <span class="english">out</span> <span class="english">and</span> <span class="english">stumbling</span></div>
-            <div id="line12"><span class="english">And</span> <span class="english">flound'ring</span> <span class="english">like</span> <span class="english">a</span> <span class="english">man</span> <span class="english">in</span> <span class="latin">fire</span> <span class="english">or</span> <span class="latin">lime</span>.–</div>
-            <div id="line13"><span class="english">Dim</span>, <span class="english">through</span> <span class="english">the</span> <span class="english">misty</span> <span class="french">panes</span> <span class="english">and</span> <span class="english">thick</span> <span class="english">green</span> <span class="english">light</span>,</div>
-            <div id="line14"><span class="english">As</span> <span class="english">under</span> <span class="english">a</span> <span class="english">green</span> <span class="english">sea</span>, <span class="english">I</span> <span class="english">saw</span> <span class="english">him</span> <span class="english">drowning</span>.</div>
+            <div id="line12"><span class="english">And</span> <span class="english">flound'ring</span> <span class="english">like</span> <span class="english">a</span> <span class="english">man</span> <span class="english">in</span> <span class="latin">fire</span> <span class="english">or</span> <span class="latin">lime.–</span></div>
+            <div id="line13"><span class="english">Dim,</span> <span class="english">through</span> <span class="english">the</span> <span class="english">misty</span> <span class="french">panes</span> <span class="english">and</span> <span class="english">thick</span> <span class="english">green</span> <span class="english">light,</span></div>
+            <div id="line14"><span class="english">As</span> <span class="english">under</span> <span class="english">a</span> <span class="english">green</span> <span class="english">sea,</span> <span class="english">I</span> <span class="english">saw</span> <span class="english">him</span> <span class="english">drowning.</span></div>
             <br>
-            <div id="line15"><span class="english">In</span> <span class="english">all</span> <span class="english">my</span> <span class="english">dreams</span>, <span class="english">before</span> <span class="english">my</span> <span class="english">helpless</span> <span class="english">sight</span>,</div>
-            <div id="line16"><span class="english">He</span> <span class="french">plunges</span> <span class="english">at</span> <span class="english">me</span>, <span class="english">guttering</span>, <span class="english">choking</span>, <span class="english">drowning</span>.</div>
+            <div id="line15"><span class="english">In</span> <span class="english">all</span> <span class="english">my</span> <span class="english">dreams,</span> <span class="english">before</span> <span class="english">my</span> <span class="english">helpless</span> <span class="english">sight,</span></div>
+            <div id="line16"><span class="english">He</span> <span class="french">plunges</span> <span class="english">at</span> <span class="english">me,</span> <span class="english">guttering,</span> <span class="english">choking,</span> <span class="english">drowning.</span></div>
             <br>
             <div id="line17"><span class="english">If</span> <span class="english">in</span> <span class="english">some</span> <span class="english">smothering</span> <span class="english">dreams</span> <span class="english">you</span> <span class="english">too</span> <span class="english">could</span> <span class="english">pace</span></div>
-            <div id="line18"><span class="english">Behind</span> <span class="english">the</span> <span class="english">wagon</span> <span class="english">that</span> <span class="english">we</span> <span class="english">flung</span> <span class="english">him</span> <span class="english">in</span>,</div>
-            <div id="line19"><span class="english">And</span> <span class="english">watch</span> <span class="english">the</span> <span class="english">white</span> <span class="english">eyes</span> <span class="english">writhing</span> <span class="english">in</span> <span class="english">his</span> <span class="french">face</span>,</div>
-            <div id="line20"><span class="english">His</span> <span class="english">hanging</span> <span class="french">face</span>, <span class="english">like</span> <span class="english">a</span> <span class="french">devil'</span> <span class="latin">sick</span> <span class="english">of</span> <span class="latin">sin</span>;</div>
-            <div id="line21"><span class="english">If</span> <span class="english">you</span> <span class="english">could</span> <span class="english">hear</span>, <span class="english">at</span> <span class="english">every</span> <span class="english">jolt</span>, <span class="english">the</span> <span class="english">blood</span></div>
-            <div id="line22"><span class="english">Come</span> <span class="french">gargling</span> <span class="english">from</span> <span class="english">the</span> <span class="english">froth</span>-<span class="french">corrupted</span> <span class="english">lungs</span>,</div>
-            <div id="line23"><span class="latin">Obscene</span> <span class="english">as</span> <span class="latin">cancer</span>, <span class="english">bitter</span> <span class="english">as</span> <span class="english">the</span> <span class="english">cud</span></div>
-            <div id="line24"><span class="english">Of</span> <span class="french">vile</span>, <span class="latin">incurable</span> <span class="english">sores</span> <span class="english">on</span> <span class="latin">innocent</span> <span class="english">tongues</span>,</div>
-            <div id="line25"><span class="english">My</span> <span class="english">friend</span>, <span class="english">you</span> <span class="english">would</span> <span class="english">not</span> <span class="english">tell</span> <span class="english">with</span> <span class="english">such</span> <span class="english">high</span> <span class="english">zest</span></div>
-            <div id="line26"><span class="english">To</span> <span class="english">children</span> <span class="latin">ardent</span> <span class="english">for</span> <span class="latin">some</span> <span class="latin">desperate</span> <span class="latin">glory</span>,</div>
-            <div id="line27"><span class="english">The</span> <span class="english">old</span> <span class="english">Lie</span>: <span style="font-style: italic;"><span class="latin">Dulce</span> <span class="latin">et</span> <span class="latin">decorum</span> <span class="latin">est</span></span></div>
-            <div id="line28"><span style="font-style: italic;"><span class="latin">Pro</span> <span class="latin">patria</span> <span class="latin">mori</span>.</span></div>
+            <div id="line18"><span class="english">Behind</span> <span class="english">the</span> <span class="english">wagon</span> <span class="english">that</span> <span class="english">we</span> <span class="english">flung</span> <span class="english">him</span> <span class="english">in,</span></div>
+            <div id="line19"><span class="english">And</span> <span class="english">watch</span> <span class="english">the</span> <span class="english">white</span> <span class="english">eyes</span> <span class="english">writhing</span> <span class="english">in</span> <span class="english">his</span> <span class="french">face,</span></div>
+            <div id="line20"><span class="english">His</span> <span class="english">hanging</span> <span class="french">face,</span> <span class="english">like</span> <span class="english">a</span> <span class="french">devil'</span> <span class="latin">sick</span> <span class="english">of</span> <span class="latin">sin;</span></div>
+            <div id="line21"><span class="english">If</span> <span class="english">you</span> <span class="english">could</span> <span class="english">hear,</span> <span class="english">at</span> <span class="english">every</span> <span class="english">jolt,</span> <span class="english">the</span> <span class="english">blood</span></div>
+            <div id="line22"><span class="english">Come</span> <span class="french">gargling</span> <span class="english">from</span> <span class="english">the</span> <span class="english">froth-</span><span class="french">corrupted</span> <span class="english">lungs,</span></div>
+            <div id="line23"><span class="latin">Obscene</span> <span class="english">as</span> <span class="latin">cancer,</span> <span class="english">bitter</span> <span class="english">as</span> <span class="english">the</span> <span class="english">cud</span></div>
+            <div id="line24"><span class="english">Of</span> <span class="french">vile,</span> <span class="latin">incurable</span> <span class="english">sores</span> <span class="english">on</span> <span class="latin">innocent</span> <span class="english">tongues,</span></div>
+            <div id="line25"><span class="english">My</span> <span class="english">friend,</span> <span class="english">you</span> <span class="english">would</span> <span class="english">not</span> <span class="english">tell</span> <span class="english">with</span> <span class="english">such</span> <span class="english">high</span> <span class="french">zest</span></div>
+            <div id="line26"><span class="english">To</span> <span class="english">children</span> <span class="latin">ardent</span> <span class="english">for</span> <span class="latin">some</span> <span class="latin">desperate</span> <span class="latin">glory,</span></div>
+            <div id="line27"><span class="english">The</span> <span class="english">old</span> <span class="english">Lie:</span> <span style="font-style: italic;"><span class="latin">Dulce</span> <span class="latin">et</span> <span class="latin">decorum</span> <span class="latin">est</span></span></div>
+            <div id="line28"><span style="font-style: italic;"><span class="latin">Pro</span> <span class="latin">patria</span> <span class="latin">mori.</span></span></div>
         </div>
     </body>
 </html>

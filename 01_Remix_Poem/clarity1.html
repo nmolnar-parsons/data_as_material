@@ -6,40 +6,46 @@
         <title>Remix Poem</title>
         <link rel="stylesheet" href="style.css">
         <style>
-            /* body text is centered */
+            body {
+                text-align: center;
+            }
 
-            
             #poem {
-                display: flex;
-                width: 100vw; /* Ensure text uses full viewport width */
-                flex-wrap: wrap;
-                justify-content: space-evenly;
+                display: inline-block;
+                text-align: left;
+                margin-top: 5vh;
             }
 
-            /* Stretch lines to fill 99vw using letter spacing */
-            #poem > div {
-                letter-spacing: 1.2vw; /* Adjust spacing to stretch text */
-                text-align: justify;
+            /* default: very low opacity and quick transition */
+            #poem div[id^="line"] {
+                opacity: 0.12;
+                transition: opacity 120ms ease-in;
             }
 
-            /* Center "Gas! Gas!" and fix it in place */
-            #gas {
-                font-size: 200px;
-                width: 100vw; /* Ensure it spans the full width of the viewport */
-                text-align: center; /* Center the text horizontally */
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 10; /* Ensure it stays above other content */
-            }
+            /* focused cluster: strong ramp centered on lines 6-8 */
+            #poem #line3,
+            #poem #line11 { opacity: 0.22; } /* two away */
+            #poem #line4,
+            #poem #line10 { opacity: 0.40; } /* one further */
+            #poem #line5,
+            #poem #line9  { opacity: 0.65; } /* adjacent */
+            #poem #line6,
+            #poem #line7,
+            #poem #line8  { opacity: 1.00; } /* peak */
+
+            /* end cluster: ramp into line 28 */
+            #poem #line25 { opacity: 0.35; } /* two away */
+            #poem #line26 { opacity: 0.60; } /* one away */
+            #poem #line27 { opacity: 0.90; } /* adjacent */
+            #poem #line28 { opacity: 1.00; } /* peak */
         </style>
     </head>
     <body>
         <div class="sidebar">
             <p>Sidebar content here</p>
             <a href="index.html">home</a>
-            <a href="weight2.html">previous</a>
-            <a href="weight4.html">next</a>
+            <a href="map2.html">previous</a>
+            <a href="temp1.html">next</a>
         </div>
         <div id="poem">
             <div id="line1">Bent double, like old beggars under sacks,</div>
@@ -50,15 +56,17 @@
             <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
             <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
             <div id="line8">Of gas-shells dropping softly behind.</div>
-            <div id="line9"><span id="gas">Gas! Gas!</span></div>
-            <div id="line9b">Quick, boys! – An ecstasy of fumbling,</div>
+            <br>
+            <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
             <div id="line10">Fitting the clumsy helmets just in time;</div>
             <div id="line11">But someone still was yelling out and stumbling</div>
             <div id="line12">And flound'ring like a man in fire or lime.–</div>
             <div id="line13">Dim, through the misty panes and thick green light,</div>
             <div id="line14">As under a green sea, I saw him drowning.</div>
+            <br>
             <div id="line15">In all my dreams, before my helpless sight,</div>
             <div id="line16">He plunges at me, guttering, choking, drowning.</div>
+            <br>
             <div id="line17">If in some smothering dreams you too could pace</div>
             <div id="line18">Behind the wagon that we flung him in,</div>
             <div id="line19">And watch the white eyes writhing in his face,</div>

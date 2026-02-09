@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Remix Poem</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
+            body{
+                text-align: center;
+            }
+
+            #poem {
+                display: inline-block;
+                text-align: left;
+                margin-top: 5vh;
+            }
+
+            /* Make line pairs display inline */
+            #line7, #line7b, #line8, #line8b, #line9, #line9b, #line10, #line10b, 
+            #line11, #line11b, #line12, #line12b, #line13, #line13b, #line14, #line14b, 
+            #line15, #line15b, #line16, #line16b, #line17, #line17b, #line18, #line18b, 
+            #line19, #line19b {
+                display: inline-block;
+            }
+
+            /* Line 7 - shift: 42.86px */
+            #line7 { transform: translateX(-42.86px); }
+            #line7b { transform: translateX(42.86px); }
+
+            /* Line 8 - shift: 85.71px */
+            #line8 { transform: translateX(-85.71px); }
+            #line8b { transform: translateX(85.71px); }
+
+            /* Line 9 - shift: 128.57px */
+            #line9 { transform: translateX(-128.57px); }
+            #line9b { transform: translateX(128.57px); }
+
+            /* Line 10 - shift: 171.43px */
+            #line10 { transform: translateX(-171.43px); }
+            #line10b { transform: translateX(171.43px); }
+
+            /* Line 11 - shift: 214.29px */
+            #line11 { transform: translateX(-214.29px); }
+            #line11b { transform: translateX(214.29px); }
+
+            /* Line 12 - shift: 257.14px */
+            #line12 { transform: translateX(-257.14px); }
+            #line12b { transform: translateX(257.14px); }
+
+            /* Line 13 - shift: 300px (maximum) */
+            #line13 { transform: translateX(-300px); }
+            #line13b { transform: translateX(300px); }
+
+            /* Line 14 - shift: 257.14px */
+            #line14 { transform: translateX(-257.14px); }
+            #line14b { transform: translateX(257.14px); }
+
+            /* Line 15 - shift: 214.29px */
+            #line15 { transform: translateX(-214.29px); }
+            #line15b { transform: translateX(214.29px); }
+
+            /* Line 16 - shift: 171.43px */
+            #line16 { transform: translateX(-171.43px); }
+            #line16b { transform: translateX(171.43px); }
+
+            /* Line 17 - shift: 128.57px */
+            #line17 { transform: translateX(-128.57px); }
+            #line17b { transform: translateX(128.57px); }
+
+            /* Line 18 - shift: 85.71px */
+            #line18 { transform: translateX(-85.71px); }
+            #line18b { transform: translateX(85.71px); }
+
+            /* Line 19 - shift: 42.86px */
+            #line19 { transform: translateX(-42.86px); }
+            #line19b { transform: translateX(42.86px); }
+           
+        </style>
+    </head>
+    <body>
+        <div class="sidebar">
+            <p>Sidebar content here</p>
+            <a href="index.html">home</a>
+            <a href="explosion2.html">previous</a>
+            <a href="explosion4.html">next</a>
+        </div>
+        <div id="poem">
+            <div id="line1">Bent double, like old beggars under sacks,</div>
+            <div id="line2">Knock-kneed, coughing like hags, we cursed through sludge,</div>
+            <div id="line3">Till on the haunting flares we turned our backs,</div>
+            <div id="line4">And towards our distant rest began to trudge.</div>
+            <div id="line5">Men marched asleep. Many had lost their boots,</div>
+            <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
+            <div><div id="line7">Drunk with fatigue;</div><div id="line7b">deaf even to the hoots</div></div>
+            <div><div id="line8">Of gas-shells</div><div id="line8b">dropping softly behind.</div></div>
+            <br>
+            <div><div id="line9">Gas! Gas! Quick, boys!</div><div id="line9b">– An ecstasy of fumbling,</div></div>
+            <div><div id="line10">Fitting the clumsy</div><div id="line10b">helmets just in time;</div></div>
+            <div><div id="line11">But someone still was</div><div id="line11b">yelling out and stumbling</div></div>
+            <div><div id="line12">And flound'ring like</div><div id="line12b">a man in fire or lime.–</div></div>
+            <div><div id="line13">Dim, through the misty</div><div id="line13b">panes and thick green light,</div></div>
+            <div><div id="line14">As under a green sea,</div><div id="line14b">I saw him drowning.</div></div>
+            <div><div id="line15">In all my dreams,</div><div id="line15b">before my helpless sight,</div></div>
+            <div><div id="line16">He plunges at me,</div><div id="line16b">guttering, choking, drowning.</div></div>
+            <br>
+            <div><div id="line17">If in some smothering</div><div id="line17b">dreams you too could pace</div></div>
+            <div><div id="line18">Behind the wagon</div><div id="line18b">that we flung him in,</div></div>
+            <div><div id="line19">And watch the white</div><div id="line19b">eyes writhing in his face,</div></div>
+            <div id="line20">His hanging face, like a devil's sick of sin;</div>
+            <div id="line21">If you could hear, at every jolt, the blood</div>
+            <div id="line22">Come gargling from the froth-corrupted lungs,</div>
+            <div id="line23">Obscene as cancer, bitter as the cud</div>
+            <div id="line24">Of vile, incurable sores on innocent tongues,</div>
+            <div id="line25">My friend, you would not tell with such high zest</div>
+            <div id="line26">To children ardent for some desperate glory,</div>
+            <div id="line27">The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
+            <div id="line28"><span style="font-style: italic;">Pro patria mori.</span></div>
+        </div>
+    </body>
+</html>
