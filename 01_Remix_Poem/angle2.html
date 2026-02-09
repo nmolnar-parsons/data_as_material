@@ -47,27 +47,88 @@
                 text-align: left;
             }
 
+            #line9, #line10, #line11, #line12, #line13, #line14, #line15, #line16 {
+                font-size: 20px;
+                animation: rotate360 20s linear infinite;
+            }
+
+            @keyframes rotate360 {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes rotateFromInitial {
+                from {
+                    transform: rotate(var(--initial-rotation));
+                    transform-origin: center;
+                }
+                to {
+                    transform: rotate(calc(360deg + var(--initial-rotation)));
+                    transform-origin: center;
+                }
+            }
+
             #line9 {
-                transform: rotate(45deg);
+                --initial-rotation: 12deg;
+                animation: rotateFromInitial 20s linear infinite;
+                transform-origin: center;
             }
+
+            #line10 {
+                --initial-rotation: -30deg;
+                animation: rotateFromInitial 20s linear infinite;
+                transform-origin: center;
+            }
+
+            #line11 {
+                --initial-rotation: 50deg;
+                animation: rotateFromInitial 20s linear infinite;
+                transform-origin: center;
+            }
+
+            #line12 {
+                --initial-rotation: -15deg;
+                animation: rotateFromInitial 20s linear infinite;
+                transform-origin: center;
+            }
+
+            #line13 {
+                --initial-rotation: 80deg;
+                animation: rotateFromInitial 20s linear infinite;
+                transform-origin: center;
+            }
+
             #line14 {
-                transform: rotate(-30deg);
+                --initial-rotation: -10deg;
+                animation: rotateFromInitial 20s linear infinite;
+                transform-origin: center;
             }
-            #line11, #line16 {
-                transform: rotate(15deg);
+
+            #line15 {
+                --initial-rotation: 20deg;
+                animation: rotateFromInitial 20s linear infinite;
+                transform-origin: center;
             }
-            #line13, #line10 {
-                transform: rotate(18deg);
+
+            #line16 {
+                --initial-rotation: 50deg;
+                animation: rotateFromInitial 20s linear infinite;
+                transform-origin: center;
             }
-             #line15, #line12 {
-                transform: rotate(-15deg);
+
+            #big {
+                font-weight: bold;
             }
             
         </style>
     </head>
     <body>
         <div class="sidebar">
-            <p>Sidebar content here</p>
+            <p>angle2: Rotate</p>
             <a href="index.html">home</a>
             <a href="angle1.html">previous</a>
             <a href="angle3.html">next</a>
@@ -85,7 +146,7 @@
             </div>
             
             <div class="block2">
-                <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
+                <div id="line9"><span id="big">Gas! Gas!</span> Quick, boys! – An ecstasy of fumbling,</div>
                 <div id="line10">Fitting the clumsy helmets just in time;</div>
                 <div id="line11">But someone still was yelling out and stumbling</div>
                 <div id="line12">And flound'ring like a man in fire or lime.–</div>

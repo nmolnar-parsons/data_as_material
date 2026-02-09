@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Remix Poem</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
+            body {
+                text-align: center;
+            }
+
+            #poem {
+                display: inline-block;
+                text-align: center;
+                margin-top: 90px;
+                margin-left: 50px;
+                line-height: 1;
+            }
+
+            #poem div {
+                text-align: center;
+                letter-spacing: 0.2em; /* Ensure justification works */
+                overflow: visible; /* Allow text to expand for justification */
+                justify-content: space-evenly;
+            }
+
+            /* Fade in and fade out effect with increased range */
+            @keyframes fadeInOut {
+                0%, 100% {
+                    opacity: 0.2;
+                }
+                50% {
+                    opacity: 1;
+                }
+            }
+
+            #poem div {
+                opacity: 0.2;
+                animation: fadeInOut 5s infinite; /* Increased animation duration */
+                animation-delay: calc(var(--delay) * 0.4s); /* Adjusted delay range */
+                margin: 0.5vh 0;
+            }
+
+            #line1 {
+                --delay: 0;
+                --final-opacity: 0.2;
+            }
+
+            #line2 {
+                --delay: 1;
+                --final-opacity: 0.2;
+            }
+
+            #line3 {
+                --delay: 2;
+                --final-opacity: 0.2;
+            }
+
+            #line4 {
+                --delay: 3;
+                --final-opacity: 0.2;
+            }
+
+            #line5 {
+                --delay: 4;
+                --final-opacity: 0.2;
+            }
+
+            #line6 {
+                --delay: 5;
+                --final-opacity: 0.2;
+            }
+
+            #line7 {
+                --delay: 6;
+                --final-opacity: 0.2;
+            }
+
+            #line8 {
+                --delay: 7;
+                --final-opacity: 0.2;
+            }
+
+            #line9 {
+                --delay: 8;
+                --final-opacity: 0.2;
+            }
+
+            #line10 {
+                --delay: 9;
+                --final-opacity: 0.2;
+            }
+
+            #line11 {
+                --delay: 10;
+                --final-opacity: 0.2;
+            }
+
+            #line12 {
+                --delay: 11;
+                --final-opacity: 0.2;
+            }
+
+            #line13 {
+                --delay: 12;
+                --final-opacity: 0.2;
+            }
+
+            #line14 {
+                --delay: 13;
+                --final-opacity: 0.2;
+            }
+
+            #line15 {
+                --delay: 14;
+                --final-opacity: 0.2;
+            }
+
+            #line16 {
+                --delay: 15;
+                --final-opacity: 0.2;
+            }
+
+            #line17 {
+                --delay: 16;
+                --final-opacity: 0.2;
+            }
+
+            #line18 {
+                --delay: 17;
+                --final-opacity: 0.2;
+            }
+
+            #line19 {
+                --delay: 18;
+                --final-opacity: 0.2;
+            }
+
+            #line20 {
+                --delay: 19;
+                --final-opacity: 0.2;
+            }
+
+            #line21 {
+                --delay: 20;
+                --final-opacity: 0.2;
+            }
+
+            #line22 {
+                --delay: 21;
+                --final-opacity: 0.2;
+            }
+
+            #line23 {
+                --delay: 22;
+                --final-opacity: 0.2;
+            }
+
+            #line24 {
+                --delay: 23;
+                --final-opacity: 0.2;
+            }
+
+            #line25 {
+                --delay: 24;
+                --final-opacity: 0.2;
+            }
+
+            #line26 {
+                --delay: 25;
+                --final-opacity: 0.2;
+            }
+
+            #line27 {
+                --delay: 26;
+                --final-opacity: 0.2;
+            }
+
+            #line28 {
+                --delay: 27;
+                --final-opacity: 0.2;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="sidebar">
+            <p>clarity4: Wave</p>
+            <a href="index.html">home</a>
+            <a href="clarity3.html">previous</a>
+            <a href="index.html">next</a>
+        </div>
+        <div id="poem">
+            <div id="line1">Bent double, like old beggars under sacks,</div>
+            <div id="line2">Knock-kneed, coughing like hags, we cursed through sludge,</div>
+            <div id="line3">Till on the haunting flares we turned our backs,</div>
+            <div id="line4">And towards our distant rest began to trudge.</div>
+            <div id="line5">Men marched asleep. Many had lost their boots,</div>
+            <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
+            <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
+            <div id="line8">Of gas-shells dropping softly behind.</div>
+            <br>
+            <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
+            <div id="line10">Fitting the clumsy helmets just in time;</div>
+            <div id="line11">But someone still was yelling out and stumbling</div>
+            <div id="line12">And flound'ring like a man in fire or lime.–</div>
+            <div id="line13">Dim, through the misty panes and thick green light,</div>
+            <div id="line14">As under a green sea, I saw him drowning.</div>
+            <br>
+            <div id="line15">In all my dreams, before my helpless sight,</div>
+            <div id="line16">He plunges at me, guttering, choking, drowning.</div>
+            <br>
+            <div id="line17">If in some smothering dreams you too could pace</div>
+            <div id="line18">Behind the wagon that we flung him in,</div>
+            <div id="line19">And watch the white eyes writhing in his face,</div>
+            <div id="line20">His hanging face, like a devil's sick of sin;</div>
+            <div id="line21">If you could hear, at every jolt, the blood</div>
+            <div id="line22">Come gargling from the froth-corrupted lungs,</div>
+            <div id="line23">Obscene as cancer, bitter as the cud</div>
+            <div id="line24">Of vile, incurable sores on innocent tongues,</div>
+            <div id="line25">My friend, you would not tell with such high zest</div>
+            <div id="line26">To children ardent for some desperate glory,</div>
+            <div id="line27">The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
+            <div id="line28"><span style="font-style: italic;">Pro patria mori.</span></div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Remix Poem</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
+            body {
+                text-align: center;
+            }
+
+            #poem {
+                display: inline-block;
+                text-align: left;
+                margin-top: 150px;
+                margin-left: 200px;
+                transform: skew(50deg,-25deg);
+            }
+
+            #line1 {
+                filter: blur(0.5px);
+            }
+
+            /* Increased blur effect coverage for words */
+            #line1 .word:nth-child(2),
+            #line1 .word:nth-child(4),
+            #line3 .word:nth-child(2),
+            #line3 .word:nth-child(4),
+            #line5 .word:nth-child(1),
+            #line5 .word:nth-child(3),
+            #line7 .word:nth-child(3),
+            #line7 .word:nth-child(5),
+            #line9 .word:nth-child(1),
+            #line9 .word:nth-child(5),
+            #line11 .word:nth-child(2),
+            #line11 .word:nth-child(4),
+            #line13 .word:nth-child(2),
+            #line13 .word:nth-child(4),
+            #line15 .word:nth-child(1),
+            #line15 .word:nth-child(3),
+            #line17 .word:nth-child(3),
+            #line17 .word:nth-child(5),
+            #line19 .word:nth-child(1),
+            #line19 .word:nth-child(5),
+            #line21 .word:nth-child(2),
+            #line21 .word:nth-child(4),
+            #line23 .word:nth-child(2),
+            #line23 .word:nth-child(4),
+            #line25 .word:nth-child(1),
+            #line25 .word:nth-child(3),
+            #line27 .word:nth-child(3),
+            #line27 .word:nth-child(5) {
+                filter: blur(0.8px);
+            }
+
+            #line2 .word:nth-child(1),
+            #line2 .word:nth-child(3),
+            #line4 .word:nth-child(2),
+            #line4 .word:nth-child(6),
+            #line6 .word:nth-child(2),
+            #line6 .word:nth-child(4),
+            #line8 .word:nth-child(4),
+            #line8 .word:nth-child(6),
+            #line10 .word:nth-child(1),
+            #line10 .word:nth-child(3),
+            #line12 .word:nth-child(1),
+            #line12 .word:nth-child(3),
+            #line14 .word:nth-child(2),
+            #line14 .word:nth-child(6),
+            #line16 .word:nth-child(2),
+            #line16 .word:nth-child(4),
+            #line18 .word:nth-child(4),
+            #line18 .word:nth-child(6),
+            #line20 .word:nth-child(1),
+            #line20 .word:nth-child(3),
+            #line22 .word:nth-child(1),
+            #line22 .word:nth-child(3),
+            #line24 .word:nth-child(2),
+            #line24 .word:nth-child(6),
+            #line26 .word:nth-child(2),
+            #line26 .word:nth-child(4),
+            #line28 .word:nth-child(4),
+            #line28 .word:nth-child(6) {
+                filter: blur(0.4px);
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="sidebar">
+            <p>clarity3: Note</p>
+            <a href="index.html">home</a>
+            <a href="clarity2.html">previous</a>
+            <a href="clarity4.html">next</a>
+        </div>
+        <div id="poem">
+            <div id="line1"><span class="word">Bent,</span> <span class="word">double,</span> <span class="word">like</span> <span class="word">old</span> <span class="word">beggars</span> <span class="word">under</span> <span class="word">sacks,</span></div>
+            <div id="line2"><span class="word">Knock-kneed,</span> <span class="word">coughing</span> <span class="word">like</span> <span class="word">hags,</span> <span class="word">we</span> <span class="word">cursed</span> <span class="word">through</span> <span class="word">sludge,</span></div>
+            <div id="line3"><span class="word">Till</span> <span class="word">on</span> <span class="word">the</span> <span class="word">haunting</span> <span class="word">flares</span> <span class="word">we</span> <span class="word">turned</span> <span class="word">our</span> <span class="word">backs,</span></div>
+            <div id="line4"><span class="word">And</span> <span class="word">towards</span> <span class="word">our</span> <span class="word">distant</span> <span class="word">rest</span> <span class="word">began</span> <span class="word">to</span> <span class="word">trudge.</span></div>
+            <div id="line5"><span class="word">Men</span> <span class="word">marched</span> <span class="word">asleep.</span> <span class="word">Many</span> <span class="word">had</span> <span class="word">lost</span> <span class="word">their</span> <span class="word">boots,</span></div>
+            <div id="line6"><span class="word">But</span> <span class="word">limped</span> <span class="word">on,</span> <span class="word">blood-shod.</span> <span class="word">All</span> <span class="word">went</span> <span class="word">lame;</span> <span class="word">all</span> <span class="word">blind;</span></div>
+            <div id="line7"><span class="word">Drunk</span> <span class="word">with</span> <span class="word">fatigue;</span> <span class="word">deaf</span> <span class="word">even</span> <span class="word">to</span> <span class="word">the</span> <span class="word">hoots</span></div>
+            <div id="line8"><span class="word">Of</span> <span class="word">gas-shells</span> <span class="word">dropping</span> <span class="word">softly</span> <span class="word">behind.</span></div>
+            <br>
+            <div id="line9"><span class="word">Gas!</span> <span class="word">Gas!</span> <span class="word">Quick,</span> <span class="word">boys!</span> <span class="word">–</span> <span class="word">An</span> <span class="word">ecstasy</span> <span class="word">of</span> <span class="word">fumbling,</span></div>
+            <div id="line10"><span class="word">Fitting</span> <span class="word">the</span> <span class="word">clumsy</span> <span class="word">helmets</span> <span class="word">just</span> <span class="word">in</span> <span class="word">time;</span></div>
+            <div id="line11"><span class="word">But</span> <span class="word">someone</span> <span class="word">still</span> <span class="word">was</span> <span class="word">yelling</span> <span class="word">out</span> <span class="word">and</span> <span class="word">stumbling</span></div>
+            <div id="line12"><span class="word">And</span> <span class="word">flound'ring</span> <span class="word">like</span> <span class="word">a</span> <span class="word">man</span> <span class="word">in</span> <span class="word">fire</span> <span class="word">or</span> <span class="word">lime.–</span></div>
+            <div id="line13"><span class="word">Dim,</span> <span class="word">through</span> <span class="word">the</span> <span class="word">misty</span> <span class="word">panes</span> <span class="word">and</span> <span class="word">thick</span> <span class="word">green</span> <span class="word">light,</span></div>
+            <div id="line14"><span class="word">As</span> <span class="word">under</span> <span class="word">a</span> <span class="word">green</span> <span class="word">sea,</span> <span class="word">I</span> <span class="word">saw</span> <span class="word">him</span> <span class="word">drowning.</span></div>
+            <br>
+            <div id="line15"><span class="word">In</span> <span class="word">all</span> <span class="word">my</span> <span class="word">dreams,</span> <span class="word">before</span> <span class="word">my</span> <span class="word">helpless</span> <span class="word">sight,</span></div>
+            <div id="line16"><span class="word">He</span> <span class="word">plunges</span> <span class="word">at</span> <span class="word">me,</span> <span class="word">guttering,</span> <span class="word">choking,</span> <span class="word">drowning.</span></div>
+            <br>
+            <div id="line17"><span class="word">If</span> <span class="word">in</span> <span class="word">some</span> <span class="word">smothering</span> <span class="word">dreams</span> <span class="word">you</span> <span class="word">too</span> <span class="word">could</span> <span class="word">pace</span></div>
+            <div id="line18"><span class="word">Behind</span> <span class="word">the</span> <span class="word">wagon</span> <span class="word">that</span> <span class="word">we</span> <span class="word">flung</span> <span class="word">him</span> <span class="word">in,</span></div>
+            <div id="line19"><span class="word">And</span> <span class="word">watch</span> <span class="word">the</span> <span class="word">white</span> <span class="word">eyes</span> <span class="word">writhing</span> <span class="word">in</span> <span class="word">his</span> <span class="word">face,</span></div>
+            <div id="line20"><span class="word">His</span> <span class="word">hanging</span> <span class="word">face,</span> <span class="word">like</span> <span class="word">a</span> <span class="word">devil's</span> <span class="word">sick</span> <span class="word">of</span> <span class="word">sin;</span></div>
+            <div id="line21"><span class="word">If</span> <span class="word">you</span> <span class="word">could</span> <span class="word">hear,</span> <span class="word">at</span> <span class="word">every</span> <span class="word">jolt,</span> <span class="word">the</span> <span class="word">blood</span></div>
+            <div id="line22"><span class="word">Come</span> <span class="word">gargling</span> <span class="word">from</span> <span class="word">the</span> <span class="word">froth-corrupted</span> <span class="word">lungs,</span></div>
+            <div id="line23"><span class="word">Obscene</span> <span class="word">as</span> <span class="word">cancer,</span> <span class="word">bitter</span> <span class="word">as</span> <span class="word">the</span> <span class="word">cud</span></div>
+            <div id="line24"><span class="word">Of</span> <span class="word">vile,</span> <span class="word">incurable</span> <span class="word">sores</span> <span class="word">on</span> <span class="word">innocent</span> <span class="word">tongues,</span></div>
+            <div id="line25"><span class="word">My</span> <span class="word">friend,</span> <span class="word">you</span> <span class="word">would</span> <span class="word">not</span> <span class="word">tell</span> <span class="word">with</span> <span class="word">such</span> <span class="word">high</span> <span class="word">zest</span></div>
+            <div id="line26"><span class="word">To</span> <span class="word">children</span> <span class="word">ardent</span> <span class="word">for</span> <span class="word">some</span> <span class="word">desperate</span> <span class="word">glory,</span></div>
+            <div id="line27"><span class="word">The</span> <span class="word">old</span> <span class="word">Lie:</span> <span class="word"><span style="font-style: italic;">Dulce</span></span> <span class="word"><span style="font-style: italic;">et</span></span> <span class="word"><span style="font-style: italic;">decorum</span></span> <span class="word"><span style="font-style: italic;">est</span></span></div>
+            <div id="line28"><span class="word"><span style="font-style: italic;">Pro</span></span> <span class="word"><span style="font-style: italic;">patria</span></span> <span class="word"><span style="font-style: italic;">mori.</span></span></div>
+        </div>
+    </body>
+</html>

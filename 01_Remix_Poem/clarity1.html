@@ -13,7 +13,8 @@
             #poem {
                 display: inline-block;
                 text-align: left;
-                margin-top: 5vh;
+                margin-top: 150px;
+                margin-left: 100px;
             }
 
             /* default: very low opacity and quick transition */
@@ -38,14 +39,23 @@
             #poem #line26 { opacity: 0.60; } /* one away */
             #poem #line27 { opacity: 0.90; } /* adjacent */
             #poem #line28 { opacity: 1.00; } /* peak */
+
+            /* Adjusting even and odd lines */
+            #poem div:nth-child(odd) {
+                transform: translateX(-30px);
+            }
+
+            #poem div:nth-child(even) {
+                transform: translateX(150px);
+            }
         </style>
     </head>
     <body>
         <div class="sidebar">
-            <p>Sidebar content here</p>
+            <p>clarity1: Haze</p>
             <a href="index.html">home</a>
-            <a href="map2.html">previous</a>
-            <a href="temp1.html">next</a>
+            <a href="space4.html">previous</a>
+            <a href="clarity2.html">next</a>
         </div>
         <div id="poem">
             <div id="line1">Bent double, like old beggars under sacks,</div>
