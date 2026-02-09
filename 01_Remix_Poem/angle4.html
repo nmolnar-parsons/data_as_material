@@ -5,35 +5,68 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Remix Poem</title>
         <style>
-            /* body text is centered */
+            body {
+                text-align: center;
+            }
 
-            
             #poem {
-                display: flex;
-                width: 100vw; /* Ensure text uses full viewport width */
-                flex-wrap: wrap;
-                justify-content: space-evenly;
+                display: inline-block;
+                text-align: center;
             }
 
-            /* Stretch lines to fill 99vw using letter spacing */
-            #poem > div {
-                letter-spacing: 1.2vw; /* Adjust spacing to stretch text */
-                text-align: justify;
+            #poem div {
+                /* transform: rotateX(20deg); */
+                transform: perspective(500px) rotateX(50deg); 
+                transform-origin: center bottom;
             }
 
-            /* Center "Gas! Gas!" and fix it in place */
-            #gas {
-                font-size: 200px;
-                width: 100vw; /* Ensure it spans the full width of the viewport */
-                text-align: center; /* Center the text horizontally */
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 10; /* Ensure it stays above other content */
+            /* #exception {
+                font-size: 100px;
+                position: absolute;
+                left: -10px;
+                top: -80px; 
+                transform: skew(0deg);
             }
+
+            #counter {
+                display: inline-block;
+                position: relative;
+                right: -150px;
+            } */
+
+            /* Scale text from line 1 (4px) to line 28 (40px) */
+            #line1 { font-size: 4px; }
+            #line2 { font-size: 5.33px; }
+            #line3 { font-size: 6.67px; }
+            #line4 { font-size: 8px; }
+            #line5 { font-size: 9.33px; }
+            #line6 { font-size: 10.67px; }
+            #line7 { font-size: 12px; }
+            #line8 { font-size: 13.33px; }
+            #line9 { font-size: 14.67px; }
+            #line10 { font-size: 16px; }
+            #line11 { font-size: 17.33px; }
+            #line12 { font-size: 18.67px; }
+            #line13 { font-size: 20px; }
+            #line14 { font-size: 21.33px; }
+            #line15 { font-size: 22.67px; }
+            #line16 { font-size: 24px; }
+            #line17 { font-size: 25.33px; }
+            #line18 { font-size: 26.67px; }
+            #line19 { font-size: 28px; }
+            #line20 { font-size: 29.33px; }
+            #line21 { font-size: 30.67px; }
+            #line22 { font-size: 32px; }
+            #line23 { font-size: 33.33px; }
+            #line24 { font-size: 34.67px; }
+            #line25 { font-size: 36px; }
+            #line26 { font-size: 37.33px; }
+            #line27 { font-size: 38.67px; }
+            #line28 { font-size: 40px; }
+
         </style>
     </head>
-    <body>
+        <body>
         <div id="poem">
             <div id="line1">Bent double, like old beggars under sacks,</div>
             <div id="line2">Knock-kneed, coughing like hags, we cursed through sludge,</div>
@@ -43,8 +76,7 @@
             <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
             <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
             <div id="line8">Of gas-shells dropping softly behind.</div>
-            <div id="line9"><span id="gas">Gas! Gas!</span></div>
-            <div id="line9b">Quick, boys! – An ecstasy of fumbling,</div>
+            <div id="line9"><span id="exception">Gas! Gas!</span> <span id="counter">Quick, boys! – An ecstasy of fumbling,</span></div>
             <div id="line10">Fitting the clumsy helmets just in time;</div>
             <div id="line11">But someone still was yelling out and stumbling</div>
             <div id="line12">And flound'ring like a man in fire or lime.–</div>

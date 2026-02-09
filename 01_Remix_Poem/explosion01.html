@@ -6,47 +6,81 @@
         <title>Remix Poem</title>
         <style>
             /* All class=broken divs get moved to the right of the screen */
+            body {
+                text-align: center;
+            }
+
+            #poem {
+                display: inline-block;
+                text-align: left;
+            }
+
             .broken {
                 display: inline-block;
                 position: relative;
                 left: 400px;
             }
 
+            #broken1 {
+                transform: rotate(-30deg);
+                bottom: 60px;
+            }
+
+            #broken2 {
+                transform: rotate(-20deg);
+                bottom: 30px;
+            }
+
+            #broken3 {
+                left: 480px;
+            }
+
+            #broken4 {
+                transform: rotate(20deg);
+                bottom: -20px;
+            }
+
+            #broken5{
+                transform: rotate(30deg);
+                bottom: -50px;
+            }
+
 
         </style>
     </head>
     <body>
-        <h1>Ducle et Decorum Est</h1>
-        <div>Bent double, like old beggars under sacks,</div>
-        <div>Knock-kneed, coughing like hags, we cursed through sludge,</div>
-        <div>Till on the haunting flares we turned our backs,</div>
-        <div>And towards our distant rest began to trudge.</div>
-        <div>Men marched asleep. Many had lost their boots,</div>
-        <div>But limped on, blood-shod. All went lame; all blind;</div>
-        <div>Drunk with fatigue; deaf even to the hoots</div>
-        <div>Of gas-shells dropping softly behind.</div>
-        <br>
-        <div>Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
-        <div>Fitting the clumsy helmets just in time;</div>
-        <div>But someone still was yelling out and stumbling</div>
-        <div>And flound'ring like a man in fire or lime.–</div>
-        <div>Dim, through the misty panes and thick green light,</div>
-        <div>As under a green sea, I saw him drowning.</div>
-        <br>
-        <div>In all my dreams, before my helpless sight,</div>
-        <div>He plunges at me, guttering, choking, drowning.</div>
-        <br>
-        <div>If in some smothering dreams you too could pace</div>
-        <div>Behind the wagon that we flung him in,</div>
-        <div>And watch the white eyes writhing in his face,</div>
-        <div>His hanging face, <div class="broken">like a devil's sick of sin;</div></div>
-        <div>If you <div class="broken">could hear, at every jolt, the blood</div></div>
-        <div>Come <div class="broken">gargling from the froth-corrupted lungs,</div></div>
-        <div>Obscene as <div class="broken">cancer, bitter as the cud</div></div>
-        <div>Of vile, incurable sores on <div class="broken">innocent tongues,</div></div>
-        <div>My friend, you would not tell with such high zest</div>
-        <div>To children ardent for some desperate glory,</div>
-        <div>The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
-        <div><span style="font-style: italic;">Pro patria mori.</span></div>
+        <div id="poem">
+            <div>Bent double, like old beggars under sacks,</div>
+            <div>Knock-kneed, coughing like hags, we cursed through sludge,</div>
+            <div>Till on the haunting flares we turned our backs,</div>
+            <div>And towards our distant rest began to trudge.</div>
+            <div>Men marched asleep. Many had lost their boots,</div>
+            <div>But limped on, blood-shod. All went lame; all blind;</div>
+            <div>Drunk with fatigue; deaf even to the hoots</div>
+            <div>Of gas-shells dropping softly behind.</div>
+            <br>
+            <div>Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
+            <div>Fitting the clumsy helmets just in time;</div>
+            <div>But someone still was yelling out and stumbling</div>
+            <div>And flound'ring like a man in fire or lime.–</div>
+            <div>Dim, through the misty panes and thick green light,</div>
+            <div>As under a green sea, I saw him drowning.</div>
+            <br>
+            <div>In all my dreams, before my helpless sight,</div>
+            <div>He plunges at me, guttering, choking, drowning.</div>
+            <br>
+            <div>If in some smothering dreams you too could pace</div>
+            <div>Behind the wagon that we flung him in,</div>
+            <div>And watch the white eyes writhing in his face,</div>
+            <div>His hanging face, <div class="broken" id= "broken1">like a devil's sick of sin;</div></div>
+            <div>If you <div class="broken" id= "broken2">could hear, at every jolt, the blood</div></div>
+            <div>Come <div class="broken" id= "broken3">gargling from the froth-corrupted lungs,</div></div>
+            <div>Obscene as <div class="broken" id= "broken4">cancer, bitter as the cud</div></div>
+            <div>Of vile, incurable sores on <div class="broken" id= "broken5">innocent tongues,</div></div>
+            <div>My friend, you would not tell with such high zest</div>
+            <div>To children ardent for some desperate glory,</div>
+            <div>The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
+            <div><span style="font-style: italic;">Pro patria mori.</span></div>
+        </div>
     </body>
 </html>
