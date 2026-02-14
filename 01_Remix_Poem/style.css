@@ -1,13 +1,29 @@
+/* vars */
+:root {
+    --poppy-color: #E35335;
+}
+
 body {
     text-align: center;
     font-family: sans-serif;
     background-color: #ffffff;
+    margin: 0;
+    padding: 0;
 }
 
 #poem {
     margin-top: 150px;
     display: inline-block;
     text-align: left;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+#home-link:hover {
+    text-decoration: underline;
 }
 
 .sidebar {
@@ -22,5 +38,92 @@ body {
     z-index: 1000;
     font-size: 10px;
     line-height: 1;
- 
+}
+
+
+/* Navigation bar styles */
+.nav-container {
+    background-color: #000;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 40px;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: left;
+    flex-wrap: wrap;
+}
+
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: left;
+}
+
+.navigation-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+.navigation-ender {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 5px;
+    max-width: 150px;
+}
+
+#nav-spacer {
+    width: 30px;
+}
+
+.header-text {
+    color: rgb(255, 255, 255);
+    text-align: left;
+    margin: 0;
+}
+
+.nav-group-title {
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.nav-group-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.nav-button {
+    padding: 8px 12px;
+    background-color: #f9f9f9;
+    border: 2px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+    display: inline-block;
+    width: 10px;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-button:hover {
+    background-color: var(--poppy-color);
+    color: white;
 }

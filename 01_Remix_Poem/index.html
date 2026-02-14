@@ -5,25 +5,75 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Dulce et Decorum Est - Remix</title>
         <style>
+
+            /* vars */
+            :root {
+                --poppy-color: #E35335;
+            }
+            
+
+
             body {
                 margin: 0;
-                padding: 20px;
+                padding: 0;
                 /* font-family: Arial, sans-serif; */
                 display: flex;
-                gap: 40px;
+                flex-direction: column;
+                background-color: rgb(255, 255, 255);
+                color: rgb(0, 0, 0);
+                font-family: sans-serif;
+                /* max-width: 100vw; */
             }
             
             #poem {
                 /* flex: 1; */
                 text-align: left;
                 font-size: 16px;
-                width: 45%;
+                max-width: 80%;
+                font-family: sans-serif;
+                padding: 20px;
             }
 
-            svg {
-                width: 90vw;
-                height: 90vh;
-                object-fit: contain;
+            .navigation-header {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                gap: 5px;
+                /* padding: 0 20px; */
+            }
+
+            a {
+                text-decoration: none;
+                color: inherit;
+            }
+
+            #home-link:hover {
+                text-decoration: underline;
+            }
+
+            .navigation-ender {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                gap: 5px;
+                max-width: 150px;
+                /* padding: 0 20px; */
+            }
+
+            #nav-spacer {
+                width: 30px;
+            }
+
+            .header-text {
+                color: rgb(255, 255, 255);
+                text-align: left;
+                margin: 0;
+            }
+            
+            #content-wrapper {
+                display: flex;
+                gap: 40px;
+                padding: 20px;
             }
             
             #links {
@@ -71,96 +121,90 @@
             }
             
             /* Add styles for layering the SVGs */
+
             .svg-container {
-                position: relative;
-                width: 90vw;
-                height: 90vh;
+                flex: 1;  /* Takes remaining space */
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
-            .svg-container svg {
-                position: absolute;
-                top: 0;
-                left: 0;
+            svg {
                 width: 100%;
-                height: 100%;
+                height: 80vh;
+                max-width: 800px;  /* Prevents it from getting too large */
+                object-fit: contain;
             }
+
 
             #Layer_2 {
                 z-index: 2;
-                opacity: 0.5;
+                opacity: 1;
             }
 
             /* Navigation buttons */
+            .nav-container {
+                background-color: #000;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                padding-left: 40px;
+                width: 100vw - 40px;
+            }
+            
             .nav-buttons {
                 display: flex;
-                gap: 10px;
-                margin-top: 15px;
-                justify-content: center;
+                gap: 20px;
+                justify-content: left;
                 flex-wrap: wrap;
             }
             
+            .nav-group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                align-items: left;
+            }
+            
+            .nav-group-title {
+                color: #fff;
+                font-size: 12px;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin-bottom: 5px;
+                text-align: left;
+            }
+            
+            .nav-group-buttons {
+                display: flex;
+                gap: 5px;
+            }
+            
             .nav-button {
-                padding: 4px 12px; /* Reduced vertical padding */
+                padding: 8px 12px;  
                 background-color: #f9f9f9;
                 border: 2px solid #333;
                 border-radius: 4px;
                 cursor: pointer;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: bold;
-                text-transform: uppercase;
-                transition: all 0.3s ease;
                 color: #333;
                 text-decoration: none;
                 display: inline-block;
-                min-width: 60px;
+                width: 10px;
                 text-align: center;
-                position: relative;
+                transition: background-color 0.3s ease, color 0.3s ease;
             }
             
             .nav-button:hover {
-                background-color: #E35335;
+                background-color: var(--poppy-color);
                 color: white;
-                border-color: #E35335;
+                
             }
-            
-            /* Sub-buttons that appear on hover */
-            .sub-buttons {
-                display: flex;
-                flex-direction: column;
-                gap: 3px;
-                opacity: 0;
-                max-height: 0;
-                overflow: hidden;
-                transition: all 0.3s ease;
-                margin-top: 5px;
-            }
-            
-            .nav-button:hover .sub-buttons {
-                opacity: 1;
-                max-height: 100px;
-            }
-            
-            .sub-button {
-                padding: 2px 8px; /* Reduced vertical padding */
-                background-color: #333;
-                color: white;
-                border: none;
-                border-radius: 3px;
-                font-size: 9px;
-                font-weight: bold;
-                text-decoration: none;
-                text-align: center;
-                transition: background-color 0.2s ease;
-                display: block;
-            }
-            
-            .sub-button:hover {
-                background-color: #E35335;
-            }
+
             
             /* Petal highlighting when button is hovered */
             .petal-highlighted {
-                fill: #E35335 !important;
+                fill: var(--poppy-color) !important;
                 opacity: 1 !important;
             }
 
@@ -171,7 +215,7 @@
             }
 
             .petal-link:hover path {
-                fill: #E35335 !important;
+                fill: var(--poppy-color) !important;
                 opacity: 1 !important;
             }
 
@@ -183,7 +227,7 @@
             }
 
             #Layer_2 path:not(.cls-1):hover {
-                fill: #E35335 !important;
+                fill: var(--poppy-color) !important;
                 opacity: 1 !important;
             }
         </style>
@@ -212,9 +256,10 @@
                     }
                 });
                 
-                // Button hover effects on petals
-                navButtons.forEach((button, index) => {
-                    const correspondingPetal = paths[index];
+                // Map each button to its corresponding petal (groups of 4 buttons per petal)
+                navButtons.forEach((button, buttonIndex) => {
+                    const petalIndex = Math.floor(buttonIndex / 4); // 0-3 -> petal 0, 4-7 -> petal 1, etc.
+                    const correspondingPetal = paths[petalIndex];
                     
                     if (correspondingPetal) {
                         button.addEventListener('mouseenter', function() {
@@ -227,21 +272,29 @@
                     }
                 });
                 
-                // Petal hover highlights corresponding button
-                paths.forEach((path, index) => {
-                    const correspondingButton = navButtons[index];
-                    
-                    if (correspondingButton && index < links.length) {
+                // Petal hover highlights all corresponding buttons in that group
+                paths.forEach((path, petalIndex) => {
+                    if (petalIndex < 5) {
                         path.addEventListener('mouseenter', function() {
-                            correspondingButton.style.backgroundColor = '#E35335';
-                            correspondingButton.style.color = 'white';
-                            correspondingButton.style.borderColor = '#E35335';
+                            // Highlight all 4 buttons for this petal
+                            for (let i = 0; i < 4; i++) {
+                                const buttonIndex = petalIndex * 4 + i;
+                                if (navButtons[buttonIndex]) {
+                                    navButtons[buttonIndex].style.backgroundColor = 'var(--poppy-color)';
+                                    navButtons[buttonIndex].style.color = 'white';
+                                }
+                            }
                         });
                         
                         path.addEventListener('mouseleave', function() {
-                            correspondingButton.style.backgroundColor = '';
-                            correspondingButton.style.color = '';
-                            correspondingButton.style.borderColor = '';
+                            // Remove highlight from all 4 buttons
+                            for (let i = 0; i < 4; i++) {
+                                const buttonIndex = petalIndex * 4 + i;
+                                if (navButtons[buttonIndex]) {
+                                    navButtons[buttonIndex].style.backgroundColor = '';
+                                    navButtons[buttonIndex].style.color = '';
+                                }
+                            }
                         });
                     }
                 });
@@ -249,95 +302,111 @@
         </script>
     </head>
     <body>
-        <div id="poem">
-            <h2>Dulce et Decorum Est</h2>
-            <h4>Wilfred Owen, 1920</h4>
-            <div id="line1">Bent double, like old beggars under sacks,</div>
-            <div id="line2">Knock-kneed, coughing like hags, we cursed through sludge,</div>
-            <div id="line3">Till on the haunting flares we turned our backs,</div>
-            <div id="line4">And towards our distant rest began to trudge.</div>
-            <div id="line5">Men marched asleep. Many had lost their boots,</div>
-            <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
-            <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
-            <div id="line8">Of gas-shells dropping softly behind.</div>
-            <br>
-            <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
-            <div id="line10">Fitting the clumsy helmets just in time;</div>
-            <div id="line11">But someone still was yelling out and stumbling</div>
-            <div id="line12">And flound'ring like a man in fire or lime.–</div>
-            <div id="line13">Dim, through the misty panes and thick green light,</div>
-            <div id="line14">As under a green sea, I saw him drowning.</div>
-            <br>
-            <div id="line15">In all my dreams, before my helpless sight,</div>
-            <div id="line16">He plunges at me, guttering, choking, drowning.</div>
-            <br>
-            <div id="line17">If in some smothering dreams you too could pace</div>
-            <div id="line18">Behind the wagon that we flung him in,</div>
-            <div id="line19">And watch the white eyes writhing in his face,</div>
-            <div id="line20">His hanging face, like a devil's sick of sin;</div>
-            <div id="line21">If you could hear, at every jolt, the blood</div>
-            <div id="line22">Come gargling from the froth-corrupted lungs,</div>
-            <div id="line23">Obscene as cancer, bitter as the cud</div>
-            <div id="line24">Of vile, incurable sores on innocent tongues,</div>
-            <div id="line25">My friend, you would not tell with such high zest</div>
-            <div id="line26">To children ardent for some desperate glory,</div>
-            <div id="line27">The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
-            <div id="line28"><span style="font-style: italic;">Pro patria mori.</span></div>
+        <div class="nav-container">
+            <div class="nav-buttons">
+                <div class="navigation-header">
+                    <a href="index.html" id="home-link">
+                        <h2 class="header-text">Dulce et Decorum Est</h2>
+                    </a>
+                    <h4 class="header-text">by Wilfred Owen, 1920</h4>
+                </div>
+                <div id="nav-spacer"></div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Explosion</div>
+                    <div class="nav-group-buttons">
+                        <a href="explosion1.html" class="nav-button">1</a>
+                        <a href="explosion2.html" class="nav-button">2</a>
+                        <a href="explosion3.html" class="nav-button">3</a>
+                        <a href="explosion4.html" class="nav-button">4</a>
+                    </div>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Space</div>
+                    <div class="nav-group-buttons">
+                        <a href="space1.html" class="nav-button">1</a>
+                        <a href="space2.html" class="nav-button">2</a>
+                        <a href="space3.html" class="nav-button">3</a>
+                        <a href="space4.html" class="nav-button">4</a>
+                    </div>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Angle</div>
+                    <div class="nav-group-buttons">
+                        <a href="angle1.html" class="nav-button">1</a>
+                        <a href="angle2.html" class="nav-button">2</a>
+                        <a href="angle3.html" class="nav-button">3</a>
+                        <a href="angle4.html" class="nav-button">4</a>
+                    </div>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Weight</div>
+                    <div class="nav-group-buttons">
+                        <a href="weight1.html" class="nav-button">1</a>
+                        <a href="weight2.html" class="nav-button">2</a>
+                        <a href="weight3.html" class="nav-button">3</a>
+                        <a href="weight4.html" class="nav-button">4</a>
+                    </div>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-group-title">Clarity</div>
+                    <div class="nav-group-buttons">
+                        <a href="clarity1.html" class="nav-button">1</a>
+                        <a href="clarity2.html" class="nav-button">2</a>
+                        <a href="clarity3.html" class="nav-button">3</a>
+                        <a href="clarity4.html" class="nav-button">4</a>
+                    </div>
+                </div>
+                <div id="nav-spacer"></div>
+                <div class="navigation-ender">
+                    <a href="https://en.wikipedia.org/wiki/Dulce_et_Decorum_est" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the poem</h5></a>
+                    <a href="https://github.com/nmolnar-parsons/data_as_material" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the project</h5></a>
+                </div>
+            </div>
         </div>
         
-        <div class="svg-container">
-            <?xml version="1.0" encoding="UTF-8"?>
-            <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 285.37 249.77">
-            <defs><style>.cls-1{fill:#fff;}</style></defs>
-            <path d="M101.92,31.13c4.04-11.95,12.31-20.35,23.77-25.82,12.01-5.73,24.71-6.85,37.48-3.23,9.13,2.58,18.31,4.34,27.71,5.64,21.41,2.97,40.93,20.11,45.61,39.42,2.54,10.5,1.13,20.56-4.19,30.01-.76,1.35-2.41,2.42-3.89,3.16-4.37,2.18-8.91,4.04-13.31,6.18-9.83,4.78-16.21,13.48-24.26,20.29-10.85,9.19-21.52,18.58-32.28,27.87-.59.51-1.29.91-2.24,1.08-.04.02-.07.05-.12.06-.13.03-.25.03-.37,0-.05,0-.1.02-.16.02l.05-.05c-.22-.06-.42-.19-.6-.35-.15-.14-.28-.29-.4-.45-.17-.21-.36-.41-.55-.61-.59-.65-1.2-1.29-1.77-1.95-.14-.16-.28-.33-.42-.48l-.21-.21c.15.15-.05-.04-.09-.06-.03-.02-.06-.05-.09-.07-.22-.12-.44-.25-.66-.37-.28-.15-.6-.32-.87-.53h0c-.69-.36-1.37-.69-2.08-1.03-2.02-.97-4.17-1.76-6.34-2.34-1.9-.52-3.88-.82-5.83-1.1-.38-.06-.94-.13-1.46-.28-.06,0-.11.02-.18.02-.2,0-.37-.04-.51-.1v.06c-.24.07-.48.14-.72.21-.36-.9-.76-1.78-1.07-2.69-.03-.09-.06-.18-.09-.27-.43-.7-.69-1.48-.76-2.28-6-17.8-10.8-35.91-14.55-54.29-.93-4.57-2.35-9.11-4.11-13.45-.51-1.26-.95-2.52-1.32-3.79-1.53-1.72-2.6-3.85-3.31-6.15-2.26-3.08-4.33-5.86-6.19-8.76-.48-.74.03-2.24.39-3.29v-.02Z"/><path d="M15.91,114.41C-3.09,98.85-1.08,73.57,10.41,59.54c2.86-3.49,6.92-6.24,10.85-8.69,4.15-2.59,7.64-5.61,10.54-9.47,20.12-26.85,57.62-24.11,73.65,5.27,5.25,9.62,7.41,20.12,9.78,30.58,3.72,16.44,7.38,32.9,11.06,49.35.05.21.06.42.03.65.02.52-.15,1.06-.54,1.39-1.56,1.28-3.47,1.82-5.1,2.95-.69.48-1.3,1.08-1.88,1.72,0,0,0,.02.02.03-.04.03-.08.05-.12.08-.36.41-.71.83-1.04,1.26v.02l-.04.04c-.26.34-.51.67-.76,1-.36.48-.7.98-1.03,1.49-.09.2-.17.41-.26.61l.11.09c-.1.11-.19.21-.29.32-.24.52-.49,1.04-.75,1.55-.17.33-.35.65-.54.96-.02.05-.04.09-.05.14-.3.96-.48,1.9-.87,2.83-.33.77-.75,1.55-.72,2.41.08,1.75-2.18,2.37-3.24,1.39-1-.29-2-.57-3-.86-4.06-1.19-8.13-2.37-12.19-3.55-6.19-.74-12.55-2.91-17.68-4.71-1.8-.63-3.77-1.33-5.8-2.13-9.07-2.66-18.12-5.34-27.14-8.13-9.87-3.05-19.4-7.11-27.46-13.71h-.04Z"/><path d="M146.26,239.51c-15.51,11.17-32.71,12.48-50.7,7.48-14.03-3.9-28.08-7.6-42.42-10.36-15.99-3.09-27.84-12.14-35.58-26.14-3.87-6.99-7.9-13.9-11.71-20.92-6.56-12.11-8.24-24.6-1.71-37.17,5.87-11.3,16.22-16.56,28.73-18.25,7.82-1.05,15.51-.36,23.12,1.83,8.49,2.44,17.03,4.72,25.48,7.36.81.24,1.62.49,2.4.76.49.16.98.32,1.46.48h0c1.32.23,2.53.62,3.78,1.07,2.19.5,4.4.87,6.58,1.49,1.88.53,3.87.84,5.62,1.64,1.71.45,3.43.85,5.13,1.34h0c1.57.34,2.73.58,3.72,1.33.11.05.22.12.33.18.15.04.3.07.45.11,0,.04,0,.08-.02.12,2.42,1.48,4.01,4.19,5.79,6.34,2.79,3.39,5.78,6.89,9.68,9.03.15.08.3.14.45.21.27,0,.53.04.76.2.42.28.86.5,1.32.68.19.06.37.14.56.2.04,0,.08.03.13.04.43.13.87.24,1.31.34.23.05.46.1.69.15.42.08.85.17,1.29.23.18.03.46.08.79.14.34.04.69.07,1.06.1.28.02.55.05.82.1.6-.12,1.26,0,1.88-.03.08,0,.17-.02.26-.03.32-.13.68-.2,1.03-.21.37-.11.77-.14,1.17-.14.43-.06.87-.11,1.3-.1.44.02.84.13,1.18.35.06,0,.11.02.12.04,0,.02.02.05.04.07.16.14.31.3.43.51.29.55.59,1.1.83,1.68.13.31.25.61.37.92.05.13.1.27.15.4h0c5.01,9.76,10.37,19.39,14.46,29.51,5.58,13.79.36,27.6-12.57,36.9l.02.02Z"/><path d="M273.2,189.91c-2.51,5.48-6.53,9.69-11.5,13.22-5.64,4.01-11,8.39-16.69,12.32-3.51,2.42-7.2,4.86-11.2,6.28-9.57,3.41-18.11,8.32-26.06,14.46-12.54,9.67-26.62,12.05-41.76,6.9-3.91-1.33-7.44-3.72-11.36-5.73,2.24-3.14,4.07-5.7,5.99-8.4.02.01.05.03.07.04.24-.51.51-1.02.83-1.51-.02-.13-.02-.26,0-.39,1.05-4.44,2.21-8.85,3.35-13.27.11-.42.38-.86.31-1.25-1.88-11.5-6.81-21.9-12.35-32.08-2.05-3.77-4.12-7.53-5.8-11.53-.03-.04-.06-.07-.08-.11-.06-.11-.08-.19-.1-.29-.07-.08-.11-.19-.12-.3-.02-.04-.03-.07-.05-.11.02.02.03.05.05.07v-.13c.07-.36.36-.53.67-.66.09-.1.19-.17.29-.22.02,0,.05-.02.07-.03.06-.07.14-.12.25-.15.04,0,.08-.04.13-.05.07-.05.14-.1.2-.15.08-.06.16-.12.25-.18.06-.09.12-.18.2-.26.11-.11.23-.19.36-.28.03-.02.06-.03.09-.05.12-.05.23-.1.35-.15.1-.09.19-.18.29-.26.09-.08.19-.16.28-.25.49-.52,1.03-.95,1.6-1.29.21-.25.44-.48.64-.72.19-.23.39-.45.59-.67h0c.11-.12.21-.24.32-.36.34-.35.7-.67,1.07-.99.29-.25.57-.54.9-.74.28-.17.56-.21.83-.17v-.03l25.54,7.43c.34.02.68.08,1.02.16,1.02.14,2.05.32,3.06.5.74.14,1.5.35,2.26.58.49.08.98.18,1.46.29.58.09,1.15.22,1.73.29.58.07,1.15.14,1.71.31.01,0,.02,0,.03,0,9.82,1.67,19.75,3.55,29.75,4.89,11,1.47,22.08,1.62,32.75-2.1,4.71-1.64,9.22-3.82,13.95-5.8,5.74,5.21,7.48,14.99,3.86,22.89l-.03.02Z"/><path d="M246.66,171.33c-13.37,2.38-26.61.54-39.65-2.24-16.08-3.43-32.02-7.43-48.02-11.2-.64-.15-1.26-.43-1.88-.65.03-.16.06-.32.09-.48-.08-.18-.07-.4.11-.58.46-.47.69-1.25.91-1.86.36-.97.51-2.02.76-3.03.09-.35.16-.7.23-1.06.09-1.21.04-2.43-.08-3.64-.03-.28-.07-.57-.1-.85-.17-.78-.33-1.59-.48-2.42-.06-.36-.09-.69-.09-1.02-.23-.6-.42-1.22-.63-1.82-.05-.13,0-.26.05-.38l-.06-.06c.18-.27.3-.61.54-.81,16.15-14.06,32.35-28.07,48.44-42.19,8.2-7.2,17.23-12.84,28.3-14.7,17.8-2.99,32.74,3.55,41.93,19.26,7.53,12.86,11.04,26.84,5.96,41.39-5.83,16.68-19.02,25.27-36.34,28.35h.01Z"/></svg>
+        <div id="content-wrapper">
+            <div id="poem">
+                <div id="line1">Bent double, like old beggars under sacks,</div>
+                <div id="line2">Knock-kneed, coughing like hags, we cursed through sludge,</div>
+                <div id="line3">Till on the haunting flares we turned our backs,</div>
+                <div id="line4">And towards our distant rest began to trudge.</div>
+                <div id="line5">Men marched asleep. Many had lost their boots,</div>
+                <div id="line6">But limped on, blood-shod. All went lame; all blind;</div>
+                <div id="line7">Drunk with fatigue; deaf even to the hoots</div>
+                <div id="line8">Of gas-shells dropping softly behind.</div>
+                <br>
+                <div id="line9">Gas! Gas! Quick, boys! – An ecstasy of fumbling,</div>
+                <div id="line10">Fitting the clumsy helmets just in time;</div>
+                <div id="line11">But someone still was yelling out and stumbling</div>
+                <div id="line12">And flound'ring like a man in fire or lime.–</div>
+                <div id="line13">Dim, through the misty panes and thick green light,</div>
+                <div id="line14">As under a green sea, I saw him drowning.</div>
+                <br>
+                <div id="line15">In all my dreams, before my helpless sight,</div>
+                <div id="line16">He plunges at me, guttering, choking, drowning.</div>
+                <br>
+                <div id="line17">If in some smothering dreams you too could pace</div>
+                <div id="line18">Behind the wagon that we flung him in,</div>
+                <div id="line19">And watch the white eyes writhing in his face,</div>
+                <div id="line20">His hanging face, like a devil's sick of sin;</div>
+                <div id="line21">If you could hear, at every jolt, the blood</div>
+                <div id="line22">Come gargling from the froth-corrupted lungs,</div>
+                <div id="line23">Obscene as cancer, bitter as the cud</div>
+                <div id="line24">Of vile, incurable sores on innocent tongues,</div>
+                <div id="line25">My friend, you would not tell with such high zest</div>
+                <div id="line26">To children ardent for some desperate glory,</div>
+                <div id="line27">The old Lie: <span style="font-style: italic;">Dulce et decorum est</span></div>
+                <div id="line28"><span style="font-style: italic;">Pro patria mori.</span></div>
+            </div>
+            
+            <div class="svg-container">
+                <?xml version="1.0" encoding="UTF-8"?>
+                <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 285.37 249.77">
+                <defs><style>.cls-1{fill:#fe0000;}</style></defs>
+                <path d="M101.92,31.13c4.04-11.95,12.31-20.35,23.77-25.82,12.01-5.73,24.71-6.85,37.48-3.23,9.13,2.58,18.31,4.34,27.71,5.64,21.41,2.97,40.93,20.11,45.61,39.42,2.54,10.5,1.13,20.56-4.19,30.01-.76,1.35-2.41,2.42-3.89,3.16-4.37,2.18-8.91,4.04-13.31,6.18-9.83,4.78-16.21,13.48-24.26,20.29-10.85,9.19-21.52,18.58-32.28,27.87-.59.51-1.29.91-2.24,1.08-.04.02-.07.05-.12.06-.13.03-.25.03-.37,0-.05,0-.1.02-.16.02l.05-.05c-.22-.06-.42-.19-.6-.35-.15-.14-.28-.29-.4-.45-.17-.21-.36-.41-.55-.61-.59-.65-1.2-1.29-1.77-1.95-.14-.16-.28-.33-.42-.48l-.21-.21c.15.15-.05-.04-.09-.06-.03-.02-.06-.05-.09-.07-.22-.12-.44-.25-.66-.37-.28-.15-.6-.32-.87-.53h0c-.69-.36-1.37-.69-2.08-1.03-2.02-.97-4.17-1.76-6.34-2.34-1.9-.52-3.88-.82-5.83-1.1-.38-.06-.94-.13-1.46-.28-.06,0-.11.02-.18.02-.2,0-.37-.04-.51-.1v.06c-.24.07-.48.14-.72.21-.36-.9-.76-1.78-1.07-2.69-.03-.09-.06-.18-.09-.27-.43-.7-.69-1.48-.76-2.28-6-17.8-10.8-35.91-14.55-54.29-.93-4.57-2.35-9.11-4.11-13.45-.51-1.26-.95-2.52-1.32-3.79-1.53-1.72-2.6-3.85-3.31-6.15-2.26-3.08-4.33-5.86-6.19-8.76-.48-.74.03-2.24.39-3.29v-.02Z"/><path d="M15.91,114.41C-3.09,98.85-1.08,73.57,10.41,59.54c2.86-3.49,6.92-6.24,10.85-8.69,4.15-2.59,7.64-5.61,10.54-9.47,20.12-26.85,57.62-24.11,73.65,5.27,5.25,9.62,7.41,20.12,9.78,30.58,3.72,16.44,7.38,32.9,11.06,49.35.05.21.06.42.03.65.02.52-.15,1.06-.54,1.39-1.56,1.28-3.47,1.82-5.1,2.95-.69.48-1.3,1.08-1.88,1.72,0,0,0,.02.02.03-.04.03-.08.05-.12.08-.36.41-.71.83-1.04,1.26v.02l-.04.04c-.26.34-.51.67-.76,1-.36.48-.7.98-1.03,1.49-.09.2-.17.41-.26.61l.11.09c-.1.11-.19.21-.29.32-.24.52-.49,1.04-.75,1.55-.17.33-.35.65-.54.96-.02.05-.04.09-.05.14-.3.96-.48,1.9-.87,2.83-.33.77-.75,1.55-.72,2.41.08,1.75-2.18,2.37-3.24,1.39-1-.29-2-.57-3-.86-4.06-1.19-8.13-2.37-12.19-3.55-6.19-.74-12.55-2.91-17.68-4.71-1.8-.63-3.77-1.33-5.8-2.13-9.07-2.66-18.12-5.34-27.14-8.13-9.87-3.05-19.4-7.11-27.46-13.71h-.04Z"/><path d="M146.26,239.51c-15.51,11.17-32.71,12.48-50.7,7.48-14.03-3.9-28.08-7.6-42.42-10.36-15.99-3.09-27.84-12.14-35.58-26.14-3.87-6.99-7.9-13.9-11.71-20.92-6.56-12.11-8.24-24.6-1.71-37.17,5.87-11.3,16.22-16.56,28.73-18.25,7.82-1.05,15.51-.36,23.12,1.83,8.49,2.44,17.03,4.72,25.48,7.36.81.24,1.62.49,2.4.76.49.16.98.32,1.46.48h0c1.32.23,2.53.62,3.78,1.07,2.19.5,4.4.87,6.58,1.49,1.88.53,3.87.84,5.62,1.64,1.71.45,3.43.85,5.13,1.34h0c1.57.34,2.73.58,3.72,1.33.11.05.22.12.33.18.15.04.3.07.45.11,0,.04,0,.08-.02.12,2.42,1.48,4.01,4.19,5.79,6.34,2.79,3.39,5.78,6.89,9.68,9.03.15.08.3.14.45.21.27,0,.53.04.76.2.42.28.86.5,1.32.68.19.06.37.14.56.2.04,0,.08.03.13.04.43.13.87.24,1.31.34.23.05.46.1.69.15.42.08.85.17,1.29.23.18.03.46.08.79.14.34.04.69.07,1.06.1.28.02.55.05.82.1.6-.12,1.26,0,1.88-.03.08,0,.17-.02.26-.03.32-.13.68-.2,1.03-.21.37-.11.77-.14,1.17-.14.43-.06.87-.11,1.3-.1.44.02.84.13,1.18.35.06,0,.11.02.12.04,0,.02.02.05.04.07.16.14.31.3.43.51.29.55.59,1.1.83,1.68.13.31.25.61.37.92.05.13.1.27.15.4h0c5.01,9.76,10.37,19.39,14.46,29.51,5.58,13.79.36,27.6-12.57,36.9l.02.02Z"/><path d="M273.2,189.91c-2.51,5.48-6.53,9.69-11.5,13.22-5.64,4.01-11,8.39-16.69,12.32-3.51,2.42-7.2,4.86-11.2,6.28-9.57,3.41-18.11,8.32-26.06,14.46-12.54,9.67-26.62,12.05-41.76,6.9-3.91-1.33-7.44-3.72-11.36-5.73,2.24-3.14,4.07-5.7,5.99-8.4.02.01.05.03.07.04.24-.51.51-1.02.83-1.51-.02-.13-.02-.26,0-.39,1.05-4.44,2.21-8.85,3.35-13.27.11-.42.38-.86.31-1.25-1.88-11.5-6.81-21.9-12.35-32.08-2.05-3.77-4.12-7.53-5.8-11.53-.03-.04-.06-.07-.08-.11-.06-.11-.08-.19-.1-.29-.07-.08-.11-.19-.12-.3-.02-.04-.03-.07-.05-.11.02.02.03.05.05.07v-.13c.07-.36.36-.53.67-.66.09-.1.19-.17.29-.22.02,0,.05-.02.07-.03.06-.07.14-.12.25-.15.04,0,.08-.04.13-.05.07-.05.14-.1.2-.15.08-.06.16-.12.25-.18.06-.09.12-.18.2-.26.11-.11.23-.19.36-.28.03-.02.06-.03.09-.05.12-.05.23-.1.35-.15.1-.09.19-.18.29-.26.09-.08.19-.16.28-.25.49-.52,1.03-.95,1.6-1.29.21-.25.44-.48.64-.72.19-.23.39-.45.59-.67h0c.11-.12.21-.24.32-.36.34-.35.7-.67,1.07-.99.29-.25.57-.54.9-.74.28-.17.56-.21.83-.17v-.03l25.54,7.43c.34.02.68.08,1.02.16,1.02.14,2.05.32,3.06.5.74.14,1.5.35,2.26.58.49.08.98.18,1.46.29.58.09,1.15.22,1.73.29.58.07,1.15.14,1.71.31.01,0,.02,0,.03,0,9.82,1.67,19.75,3.55,29.75,4.89,11,1.47,22.08,1.62,32.75-2.1,4.71-1.64,9.22-3.82,13.95-5.8,5.74,5.21,7.48,14.99,3.86,22.89l-.03.02Z"/><path d="M246.66,171.33c-13.37,2.38-26.61.54-39.65-2.24-16.08-3.43-32.02-7.43-48.02-11.2-.64-.15-1.26-.43-1.88-.65.03-.16.06-.32.09-.48-.08-.18-.07-.4.11-.58.46-.47.69-1.25.91-1.86.36-.97.51-2.02.76-3.03.09-.35.16-.7.23-1.06.09-1.21.04-2.43-.08-3.64-.03-.28-.07-.57-.1-.85-.17-.78-.33-1.59-.48-2.42-.06-.36-.09-.69-.09-1.02-.23-.6-.42-1.22-.63-1.82-.05-.13,0-.26.05-.38l-.06-.06c.18-.27.3-.61.54-.81,16.15-14.06,32.35-28.07,48.44-42.19,8.2-7.2,17.23-12.84,28.3-14.7,17.8-2.99,32.74,3.55,41.93,19.26,7.53,12.86,11.04,26.84,5.96,41.39-5.83,16.68-19.02,25.27-36.34,28.35h.01Z"/></svg>
+            </div>
         </div>
     
-        <div class="nav-buttons">
-            <div class="nav-button" data-petal="0">
-                Explosion
-                <div class="sub-buttons">
-                    <a href="explosion1.html" class="sub-button">1</a>
-                    <a href="explosion2.html" class="sub-button">2</a>
-                    <a href="explosion3.html" class="sub-button">3</a>
-                    <a href="explosion4.html" class="sub-button">4</a>
-                </div>
-            </div>
-            <div class="nav-button" data-petal="1">
-                Space
-                <div class="sub-buttons">
-                    <a href="space1.html" class="sub-button">1</a>
-                    <a href="space2.html" class="sub-button">2</a>
-                    <a href="space3.html" class="sub-button">3</a>
-                    <a href="space4.html" class="sub-button">4</a>
-                </div>
-            </div>
-            <div class="nav-button" data-petal="2">
-                Angle
-                <div class="sub-buttons">
-                    <a href="angle1.html" class="sub-button">1</a>
-                    <a href="angle2.html" class="sub-button">2</a>
-                    <a href="angle3.html" class="sub-button">3</a>
-                    <a href="angle4.html" class="sub-button">4</a>
-                </div>
-            </div>
-            <div class="nav-button" data-petal="3">
-                Weight
-                <div class="sub-buttons">
-                    <a href="weight1.html" class="sub-button">1</a>
-                    <a href="weight2.html" class="sub-button">2</a>
-                    <a href="weight3.html" class="sub-button">3</a>
-                    <a href="weight4.html" class="sub-button">4</a>
-                </div>
-            </div>
-            <div class="nav-button" data-petal="4">
-                Clarity
-                <div class="sub-buttons">
-                    <a href="clarity1.html" class="sub-button">1</a>
-                    <a href="clarity2.html" class="sub-button">2</a>
-                    <a href="clarity3.html" class="sub-button">3</a>
-                    <a href="clarity4.html" class="sub-button">4</a>
-                </div>
-            </div>
-        </div>
+        
     </body>
 </html>
