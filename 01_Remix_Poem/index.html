@@ -4,70 +4,27 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Dulce et Decorum Est - Remix</title>
+        <link rel="stylesheet" href="style.css">
         <style>
-
-            /* vars */
-            :root {
-                --poppy-color: #E35335;
-            }
+            /* Page-specific styles for index.html */
             
-
-
             body {
                 margin: 0;
                 padding: 0;
-                /* font-family: Arial, sans-serif; */
                 display: flex;
                 flex-direction: column;
                 background-color: rgb(255, 255, 255);
                 color: rgb(0, 0, 0);
                 font-family: sans-serif;
-                /* max-width: 100vw; */
             }
             
             #poem {
-                /* flex: 1; */
+                margin-top: 100px;
                 text-align: left;
                 font-size: 16px;
                 max-width: 80%;
                 font-family: sans-serif;
                 padding: 20px;
-            }
-
-            .navigation-header {
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                gap: 5px;
-                /* padding: 0 20px; */
-            }
-
-            a {
-                text-decoration: none;
-                color: inherit;
-            }
-
-            #home-link:hover {
-                text-decoration: underline;
-            }
-
-            .navigation-ender {
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                gap: 5px;
-                max-width: 150px;
-                /* padding: 0 20px; */
-            }
-
-            #nav-spacer {
-                width: 30px;
-            }
-
-            .header-text {
-                color: rgb(255, 255, 255);
-                text-align: left;
-                margin: 0;
             }
             
             #content-wrapper {
@@ -120,95 +77,32 @@
                 text-decoration: underline;
             }
             
-            /* Add styles for layering the SVGs */
-
+            /* SVG and petal styles */
             .svg-container {
-                flex: 1;  /* Takes remaining space */
+                flex: 1;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                margin-top: 80px;
             }
 
             svg {
                 width: 100%;
                 height: 80vh;
-                max-width: 800px;  /* Prevents it from getting too large */
+                max-width: 800px;
                 object-fit: contain;
             }
-
 
             #Layer_2 {
                 z-index: 2;
                 opacity: 1;
             }
 
-            /* Navigation buttons */
-            .nav-container {
-                background-color: #000;
-                padding-top: 10px;
-                padding-bottom: 10px;
-                padding-left: 40px;
-                width: 100vw - 40px;
-            }
-            
-            .nav-buttons {
-                display: flex;
-                gap: 20px;
-                justify-content: left;
-                flex-wrap: wrap;
-            }
-            
-            .nav-group {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                align-items: left;
-            }
-            
-            .nav-group-title {
-                color: #fff;
-                font-size: 12px;
-                font-weight: bold;
-                text-transform: uppercase;
-                margin-bottom: 5px;
-                text-align: left;
-            }
-            
-            .nav-group-buttons {
-                display: flex;
-                gap: 5px;
-            }
-            
-            .nav-button {
-                padding: 8px 12px;  
-                background-color: #f9f9f9;
-                border: 2px solid #333;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
-                font-weight: bold;
-                color: #333;
-                text-decoration: none;
-                display: inline-block;
-                width: 10px;
-                text-align: center;
-                transition: background-color 0.3s ease, color 0.3s ease;
-            }
-            
-            .nav-button:hover {
-                background-color: var(--poppy-color);
-                color: white;
-                
-            }
-
-            
-            /* Petal highlighting when button is hovered */
             .petal-highlighted {
                 fill: var(--poppy-color) !important;
                 opacity: 1 !important;
             }
 
-            /* Style for clickable petal paths */
             .petal-link {
                 cursor: pointer;
                 transition: fill 0.3s ease;
@@ -219,7 +113,6 @@
                 opacity: 1 !important;
             }
 
-            /* Make petal paths clickable */
             #Layer_2 path:not(.cls-1) {
                 cursor: pointer;
                 transition: fill 0.3s ease;
@@ -229,6 +122,17 @@
             #Layer_2 path:not(.cls-1):hover {
                 fill: var(--poppy-color) !important;
                 opacity: 1 !important;
+            }
+
+            /* Override navigation-ender position for fixed placement on this page */
+            .navigation-ender {
+                position: fixed;
+                right: 20px;
+                top: 20px;
+                z-index: 1000;
+                max-width: 150px;
+                text-align: right;
+                align-items: flex-end;
             }
         </style>
         <script>
@@ -356,11 +260,14 @@
                         <a href="clarity4.html" class="nav-button">4</a>
                     </div>
                 </div>
-                <div id="nav-spacer"></div>
-                <div class="navigation-ender">
-                    <a href="https://en.wikipedia.org/wiki/Dulce_et_Decorum_est" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the poem</h5></a>
-                    <a href="https://github.com/nmolnar-parsons/data_as_material" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the project</h5></a>
-                </div>
+                <!-- <div id="nav-spacer"></div> -->
+            </div>
+        </div>
+        <div class="navigation-ender">
+            <div class="info-icon">i</div>
+            <div class="info-links">
+                <a href="https://en.wikipedia.org/wiki/Dulce_et_Decorum_est" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the poem</h5></a>
+                <a href="https://github.com/nmolnar-parsons/data_as_material" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the project</h5></a>
             </div>
         </div>
         

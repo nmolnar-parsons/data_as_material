@@ -16,6 +16,7 @@
                 position: relative;
                 width: 100%;
                 height: 100vh;
+                margin-top: 50px;
             }
             
             .block1 {
@@ -183,11 +184,17 @@
         </div>
         <div id="nav-spacer"></div>
         <div class="navigation-ender">
-            <a href="https://en.wikipedia.org/wiki/Dulce_et_Decorum_est" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the poem</h5></a>
-            <a href="https://github.com/nmolnar-parsons/data_as_material" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the project</h5></a>
+            <div class="info-icon">i</div>
+            <div class="info-links">
+                <a href="https://en.wikipedia.org/wiki/Dulce_et_Decorum_est" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the poem</h5></a>
+                <a href="https://github.com/nmolnar-parsons/data_as_material" target="_blank" rel="noopener noreferrer"><h5 class="header-text">About the project</h5></a>
+            </div>
         </div>
     </div>
 </div>
+<script>
+    document.querySelector('a[href="angle2.html"]').classList.add('active');
+</script>
         <div id="poem">
             <div class="block1">
                 <div id="line1">Bent double, like old beggars under sacks,</div>
