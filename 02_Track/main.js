@@ -5,13 +5,13 @@
 
     // Poster is  18x24 inches, which is a 3:4 aspect ratio. 
 const viz_dimensions = {
-    width: 900,
-    height: 1200,
+    width: 1800,
+    height: 2400,
     margin: {
         top: 100,
-        right: 200,
         bottom: 100,
-        left: 200
+        right: 300,
+        left: 300
     }
 }
 
@@ -26,9 +26,12 @@ const svg = d3.select("#viz")
     .style("background-color", "#f9f9f9"); // light background for better contrast
 
 // Load prepared CSV data
-d3.csv("nosetouch_data_prepared.csv").then(data => {
+d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     console.log(data); // Check the loaded data
     
+    //console log all locations in dataset
+    const locations = Array.from(new Set(data.map(d => d.location)));
+    console.log("Locations in dataset:", locations);
 
     // //Group data at the hour level
     // data.forEach(d => {
@@ -126,7 +129,7 @@ d3.csv("nosetouch_data_prepared.csv").then(data => {
     };
 
     // Offset perpendicular to diagonal for left/right sides
-    const perpendicularOffset = 50; // Distance from diagonal line
+    const perpendicularOffset = 60; // Distance from diagonal line
     const angle = Math.atan2(
         viz_dimensions.margin.top - (viz_dimensions.height - viz_dimensions.margin.bottom),
         (viz_dimensions.width - viz_dimensions.margin.right) - viz_dimensions.margin.left
@@ -134,24 +137,29 @@ d3.csv("nosetouch_data_prepared.csv").then(data => {
 
     // Create color scale for location
     const locationColors = d3.scaleOrdinal()
-        .domain(["Home", "School", "Commute", "Gym", "Meal", "Brother's apartment", "Party"])
-        .range(["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628"]);
+        .domain(["Home", "Commute", "School", "Meal", "Gym", "Event"])
+        .range(["#366EDE", "#951D12", "#3193AD", "#DB5E0C", "#19A851", "#F3C11B"]);
     
     // Create shape generator for part_of_body
     const bodyPartSymbol = d3.scaleOrdinal()
-        .domain(["Hand", "Sleeve", "Shoulder", "Glasses", "Whole Ass Arm"])
-        .range([d3.symbolCircle, d3.symbolSquare, d3.symbolTriangle, d3.symbolDiamond, d3.symbolStar]);
+        .domain(["Hand", "Sleeve", "Shoulder", "Tongue"])
+        .range([d3.symbolCircle, d3.symbolSquare, d3.symbolTriangle, d3.symbolDiamond]);
     
     // Create size scale for number_of_times
     const sizeScale = d3.scaleLinear()
         .domain([1, d3.max(data, d => +d.number_of_times)])
-        .range([100, 300]); // Size in square pixels for d3.symbol
-    
+        .range([1500, 5000]); // Size in square pixels for d3.symbol
+
+    //create opacity scale for touch type
+    const opacityScale = d3.scaleOrdinal()
+        .domain(["Touch","Brush","Scratch","Pinch"])
+        .range([0.5, 0.7, 0.9, 1.0]);
+
     // Group data by hour and side to stack overlapping points
     const grouped = d3.group(data, d => `${d.hour.getTime()}-${d.side}`);
     
-    const stackOffset = 20; // Vertical offset between stacked points
-    const jitter = 5; // add slight jitter to all points
+    const stackOffset = 70; // Vertical offset between stacked points
+    const jitter = 30; // add slight jitter to all points
     
     // Add stacking index to each point
     grouped.forEach(group => {
@@ -177,21 +185,21 @@ d3.csv("nosetouch_data_prepared.csv").then(data => {
             const baseX = getDiagonalX(d);
             const baseY = getDiagonalY(d);
             
-            // Handle offset based on side (perpendicular to diagonal)
+            // Handle offset based on side (horizontal spread)
             let offsetX = 0, offsetY = 0;
             if (d.side === "Left") {
-                offsetX = -perpendicularOffset * Math.cos(angle + Math.PI / 2);
-                offsetY = -perpendicularOffset * Math.sin(angle + Math.PI / 2);
+                offsetX = -perpendicularOffset;
+                offsetY = 0;
             } else if (d.side === "Right") {
-                offsetX = perpendicularOffset * Math.cos(angle + Math.PI / 2);
-                offsetY = perpendicularOffset * Math.sin(angle + Math.PI / 2);
+                offsetX = perpendicularOffset;
+                offsetY = 0;
             }
             // If side is N/A (empty string), offsetX and offsetY remain 0
             
-            // Stack along the perpendicular direction as well
+            // Stack along the horizontal direction as well
             const stackDirection = d.side === "Left" ? -1 : (d.side === "Right" ? 1 : 0);
-            const stackX = d.stackIndex * stackOffset * stackDirection * Math.cos(angle + Math.PI / 2);
-            const stackY = d.stackIndex * stackOffset * stackDirection * Math.sin(angle + Math.PI / 2);
+            const stackX = d.stackIndex * stackOffset * stackDirection;
+            const stackY = 0;
             
             const finalX = baseX + offsetX + stackX + d.jitterX;
             const finalY = baseY + offsetY + stackY + d.jitterY;
@@ -199,7 +207,7 @@ d3.csv("nosetouch_data_prepared.csv").then(data => {
             return `translate(${finalX}, ${finalY})`;
         })
         .attr("fill", d => locationColors(d.location))
-        .attr("opacity", 0.9);
+        .attr("opacity", d => opacityScale(d.type));
 
 
 
@@ -217,37 +225,43 @@ d3.csv("nosetouch_data_prepared.csv").then(data => {
         .attr("x2", viz_dimensions.width - viz_dimensions.margin.right)
         .attr("y2", viz_dimensions.margin.top)
         .attr("stroke", "black")
-        .attr("stroke-width", 4);
+        .attr("stroke-width", 10);
 
-
-
-    // Add ticks along the diagonal
-    const ticks = x.ticks(d3.timeHour.every(24)); // Adjust tick frequency as needed
+    // Add ticks along the diagonal at every midnight (00:00)
+    const tickTimes = d3.timeDay.range(
+        d3.min(data, d => d.hour),
+        d3.max(data, d => d.hour),
+        1
+    );
     
-    ticks.forEach(tick => {
-        const t = (x(tick) - viz_dimensions.margin.left) / 
-                  (viz_dimensions.width - viz_dimensions.margin.left - viz_dimensions.margin.right);
+    console.log("Tick times:", tickTimes);
+    console.log("Number of ticks:", tickTimes.length);
+    
+    tickTimes.forEach(tick => {
+        const t = diagonalScale(tick);
         
         const tickX = viz_dimensions.margin.left + t * (viz_dimensions.width - viz_dimensions.margin.left - viz_dimensions.margin.right);
         const tickY = (viz_dimensions.height - viz_dimensions.margin.bottom) - t * (viz_dimensions.height - viz_dimensions.margin.top - viz_dimensions.margin.bottom);
+        
+        console.log("Tick:", tick, "t:", t, "x:", tickX, "y:", tickY);
         
         // Tick mark
         diagonalAxis.append("line")
             .attr("x1", tickX)
             .attr("y1", tickY)
-            .attr("x2", tickX - 5 * Math.cos((angle + 90) * Math.PI / 180))
-            .attr("y2", tickY - 5 * Math.sin((angle + 90) * Math.PI / 180))
+            .attr("x2", tickX - 10 * Math.cos(angle + Math.PI / 2))
+            .attr("y2", tickY - 10 * Math.sin(angle + Math.PI / 2))
             .attr("stroke", "black")
-            .attr("stroke-width", 1);
+            .attr("stroke-width", 4);
         
         // Tick label
         diagonalAxis.append("text")
-            .attr("x", tickX - 15 * Math.cos((angle + 90) * Math.PI / 180))
-            .attr("y", tickY - 15 * Math.sin((angle + 90) * Math.PI / 180))
+            .attr("x", tickX - 20 * Math.cos(angle + Math.PI / 2))
+            .attr("y", tickY - 20 * Math.sin(angle + Math.PI / 2))
             .attr("text-anchor", "middle")
-            .attr("font-size", "10px")
-            .text(d3.timeFormat("%b %d, %H:%M")(tick))
-            .attr("transform", `rotate(${angle}, ${tickX - 15 * Math.cos((angle + 90) * Math.PI / 180)}, ${tickY - 15 * Math.sin((angle + 90) * Math.PI / 180)})`);
+            .attr("font-size", "20px")
+            .text(d3.timeFormat("%b %d")(tick))
+            .attr("transform", `rotate(${angle * 180 / Math.PI}, ${tickX - 20 * Math.cos(angle + Math.PI / 2)}, ${tickY - 20 * Math.sin(angle + Math.PI / 2)})`);
     });
 
 });
