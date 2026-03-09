@@ -33,12 +33,6 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     const locations = Array.from(new Set(data.map(d => d.location)));
     console.log("Locations in dataset:", locations);
 
-    // //Group data at the hour level
-    // data.forEach(d => {
-    //     d.datetime = new Date(d.datetime);
-    //     d.hour = d3.timeHour(d.datetime); // Group by hour
-    // });
-    // console.log(data); // Check the data with hour grouping
 
     // // use hour for x-axis
     const x = d3.scaleTime()
@@ -50,59 +44,6 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     const y = d3.scaleOrdinal()
         .domain(["0", "1"])
         .range([viz_dimensions.height * 0.55, viz_dimensions.height * 0.45]); // Position at 30% and 70% of height
-
-
-
-    // // //add jitter to y position to avoid overlap
-    // // const jitter = 20;
-
-    // // // Add points to the SVG
-    // // svg.selectAll("circle")
-    // //     .data(data)
-    // //     .enter()
-    // //     .append("circle")
-    // //     .attr("cx", d => x(new Date(d.datetime)))
-    // //     .attr("cy", d => y(d.side) + (Math.random() - 0.5) * jitter) // Add jitter to y position
-    // //     .attr("r", 5)
-    // //     .attr("fill", d => d.side === "0" ? "steelblue" : "coral");
-
-    // // //draw x-axis
-    // // const xAxis = d3.axisBottom(x)
-    // //     // .ticks(d3.timeHour.every(1)) // Adjust ticks to every hour
-    // //     // .tickFormat(d3.timeFormat("%H:%M")); // Format ticks as HH:MM
-
-    // // svg.append("g")
-    // //     .attr("transform", `translate(0, ${0.5*viz_dimensions.height})`)
-    // //     .call(xAxis);
-
-    // // new stuff here
-
-    // // Group data by hour and side to stack overlapping points
-    // const grouped = d3.group(data, d => `${d.hour.getTime()}-${d.side}`);
-    
-    // const stackOffset = 20; // Vertical offset between stacked points
-    
-    // // Add stacking index to each point
-    // grouped.forEach(group => {
-    //     group.forEach((d, i) => {
-    //         d.stackIndex = i;
-    //     });
-    // });
-
-    // // Add points to the SVG
-    // svg.selectAll("circle")
-    //     .data(data)
-    //     .enter()
-    //     .append("circle")
-    //     .attr("cx", d => x(d.hour))
-    //     .attr("cy", d => y(d.side) + (d.stackIndex * stackOffset)) // Stack overlapping points
-    //     .attr("r", 5)
-    //     .attr("fill", d => {
-    //         if (d.side === "Right") return "red";      // Left is red
-    //         if (d.side === "Left") return "blue";     // Right is blue
-    //         return "purple";                        // N/A is purple
-    //     })
-    //     .attr("opacity", 0.7); // Slightly transparent for better visibility
 
     //diagonal data
 
@@ -118,12 +59,12 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
         .range([0, 1]); // 0 = start (top-left), 1 = end (left, 400px above bottom)
 
     // Define nose curve points
-    const noseStart = { x: viz_dimensions.margin.right + 400, y: viz_dimensions.margin.top + 100};
+    const noseStart = { x: viz_dimensions.margin.right + 300, y: viz_dimensions.margin.top + 100};
     const noseEnd = { x: viz_dimensions.margin.right, y: viz_dimensions.height - viz_dimensions.margin.bottom - 500 };
     
     // Control points for cubic bezier curve to create nose shape
-    const control1 = { x: viz_dimensions.margin.right + 50, y: viz_dimensions.margin.top + 1200 }; // Bridge
-    const control2 = { x: viz_dimensions.margin.right + 2400, y: viz_dimensions.height - viz_dimensions.margin.bottom - 150 }; // Tip
+    const control1 = { x: viz_dimensions.margin.right + 200, y: viz_dimensions.margin.top + 1000 }; // Bridge
+    const control2 = { x: viz_dimensions.margin.right + 2400, y: viz_dimensions.height - viz_dimensions.margin.bottom - 250 }; // Tip
     
     // Function to get point along cubic bezier curve
     const getPointOnCurve = (t) => {
@@ -166,11 +107,11 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     };
 
     // Offset perpendicular to curve for left/right sides
-    const perpendicularOffset = 50; // Distance from curve line
+    const perpendicularOffset = 80; // Distance from curve line
 
 
     const stackOffset = 50; // Vertical offset between stacked points
-    const jitter = 0; // add slight jitter to all points
+    const jitter = 40; // add slight jitter to all points
 
     // Define SVG path data for custom symbols
     const symbolPaths = {
@@ -193,7 +134,7 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     // Create size scale for number_of_times
     const sizeScale = d3.scaleLinear()
         .domain([1, d3.max(data, d => +d.number_of_times)])
-        .range([1000, 4000]); // Size in square pixels for d3.symbol
+        .range([1000, 8000]); // Size in square pixels for d3.symbol
 
     //create opacity scale for touch type
     const opacityScale = d3.scaleOrdinal()
@@ -219,8 +160,10 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
         .append("path")
         .attr("class", "datapoint")
         .attr("d", d => {
-            // Get the path for this type, or use empty string if type not found
-            return symbolPaths[d.type] || "";
+            // Use d3.symbol with bodyPartSymbol scale
+            const symbolType = bodyPartSymbol(d.part_of_body);
+            const symbolSize = sizeScale(+d.number_of_times);
+            return d3.symbol().type(symbolType).size(symbolSize)();
         })
         .attr("transform", d => {
             const t = diagonalScale(d.hour);
@@ -251,20 +194,22 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
             const finalX = baseX + offsetX + stackX + d.jitterX;
             const finalY = baseY + offsetY + stackY + d.jitterY;
             
-            // Scale based on number_of_times
-            const scale = Math.sqrt(sizeScale(+d.number_of_times)) / 60;
+            // Convert angle to degrees and add 90 to make icons perpendicular to curve. if side is right, rotate 90 degrees in the opposite direction
+            let rotationAngle = (angle * 180 / Math.PI);
+            if (d.side === "Right") {
+                rotationAngle -= 180; // Flip the icon for right side
+            }
             
-            return `translate(${finalX}, ${finalY}) translate(-152.5, -127) scale(${scale})`;
+            return `translate(${finalX}, ${finalY}) rotate(${rotationAngle})`;
         })
         // .attr("fill", "none") // No fill, only stroke for the symbol paths
         // fill with color based on location
         .attr("fill", d => locationColors(d.location))
-        // black stroe for all points
+        .attr("opacity", d => opacityScale(d.type))
         .attr("stroke", "black")
-        .attr("stroke-width", 3)
+        .attr("stroke-width", 2)
              
-        
-        // .attr("opacity", d => opacityScale(d.type));
+    
 
 
 

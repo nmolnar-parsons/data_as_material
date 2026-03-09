@@ -33,12 +33,6 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     const locations = Array.from(new Set(data.map(d => d.location)));
     console.log("Locations in dataset:", locations);
 
-    // //Group data at the hour level
-    // data.forEach(d => {
-    //     d.datetime = new Date(d.datetime);
-    //     d.hour = d3.timeHour(d.datetime); // Group by hour
-    // });
-    // console.log(data); // Check the data with hour grouping
 
     // // use hour for x-axis
     const x = d3.scaleTime()
@@ -51,59 +45,6 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
         .domain(["0", "1"])
         .range([viz_dimensions.height * 0.55, viz_dimensions.height * 0.45]); // Position at 30% and 70% of height
 
-
-
-    // // //add jitter to y position to avoid overlap
-    // // const jitter = 20;
-
-    // // // Add points to the SVG
-    // // svg.selectAll("circle")
-    // //     .data(data)
-    // //     .enter()
-    // //     .append("circle")
-    // //     .attr("cx", d => x(new Date(d.datetime)))
-    // //     .attr("cy", d => y(d.side) + (Math.random() - 0.5) * jitter) // Add jitter to y position
-    // //     .attr("r", 5)
-    // //     .attr("fill", d => d.side === "0" ? "steelblue" : "coral");
-
-    // // //draw x-axis
-    // // const xAxis = d3.axisBottom(x)
-    // //     // .ticks(d3.timeHour.every(1)) // Adjust ticks to every hour
-    // //     // .tickFormat(d3.timeFormat("%H:%M")); // Format ticks as HH:MM
-
-    // // svg.append("g")
-    // //     .attr("transform", `translate(0, ${0.5*viz_dimensions.height})`)
-    // //     .call(xAxis);
-
-    // // new stuff here
-
-    // // Group data by hour and side to stack overlapping points
-    // const grouped = d3.group(data, d => `${d.hour.getTime()}-${d.side}`);
-    
-    // const stackOffset = 20; // Vertical offset between stacked points
-    
-    // // Add stacking index to each point
-    // grouped.forEach(group => {
-    //     group.forEach((d, i) => {
-    //         d.stackIndex = i;
-    //     });
-    // });
-
-    // // Add points to the SVG
-    // svg.selectAll("circle")
-    //     .data(data)
-    //     .enter()
-    //     .append("circle")
-    //     .attr("cx", d => x(d.hour))
-    //     .attr("cy", d => y(d.side) + (d.stackIndex * stackOffset)) // Stack overlapping points
-    //     .attr("r", 5)
-    //     .attr("fill", d => {
-    //         if (d.side === "Right") return "red";      // Left is red
-    //         if (d.side === "Left") return "blue";     // Right is blue
-    //         return "purple";                        // N/A is purple
-    //     })
-    //     .attr("opacity", 0.7); // Slightly transparent for better visibility
-
     //diagonal data
 
     data.forEach(d => {
@@ -115,65 +56,44 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     // Create a scale for position along the diagonal
     const diagonalScale = d3.scaleTime()
         .domain(d3.extent(data, d => d.hour))
-        .range([0, 1]); // 0 = start, 1 = end
+        .range([0, 1]); // 0 = start (top-left), 1 = end (left, 400px above bottom)
 
-    // Define zig-zag points (Finder icon nose style)
-    const zigStart = { x: viz_dimensions.margin.left, y: viz_dimensions.margin.top };
-    const zigPeak1 = { x: viz_dimensions.margin.left, y: viz_dimensions.height / 2 }; // End of first vertical section
-    const horizontalWidth = (viz_dimensions.width - viz_dimensions.margin.left - viz_dimensions.margin.right) / 3;
-    const zigPeak2 = { x: viz_dimensions.margin.left + horizontalWidth, y: viz_dimensions.height / 2 }; // End of horizontal section (1/3 width)
-    const zigEnd = { x: viz_dimensions.margin.left + horizontalWidth, y: viz_dimensions.height - viz_dimensions.margin.bottom };
+    // Define nose curve points
+    const noseStart = { x: viz_dimensions.margin.right + 300, y: viz_dimensions.margin.top + 100};
+    const noseEnd = { x: viz_dimensions.margin.right, y: viz_dimensions.height - viz_dimensions.margin.bottom - 500 };
     
-    // Array of segments for the zig-zag path
-    const segments = [
-        { start: zigStart, end: zigPeak1, tStart: 0, tEnd: 0.333 }, // Vertical down
-        { start: zigPeak1, end: zigPeak2, tStart: 0.333, tEnd: 0.666 }, // Horizontal right
-        { start: zigPeak2, end: zigEnd, tStart: 0.666, tEnd: 1.0 } // Vertical down
-    ];
+    // Control points for cubic bezier curve to create nose shape
+    const control1 = { x: viz_dimensions.margin.right + 200, y: viz_dimensions.margin.top + 1000 }; // Bridge
+    const control2 = { x: viz_dimensions.margin.right + 2400, y: viz_dimensions.height - viz_dimensions.margin.bottom - 250 }; // Tip
     
-    // Function to get point along zig-zag path
+    // Function to get point along cubic bezier curve
     const getPointOnCurve = (t) => {
-        // Find which segment t falls into
-        let segment;
-        if (t <= 0.333) {
-            segment = segments[0];
-        } else if (t <= 0.666) {
-            segment = segments[1];
-        } else {
-            segment = segments[2];
-        }
-        
-        // Normalize t within the segment
-        const segmentT = (t - segment.tStart) / (segment.tEnd - segment.tStart);
-        
-        // Linear interpolation along segment
-        const x = segment.start.x + segmentT * (segment.end.x - segment.start.x);
-        const y = segment.start.y + segmentT * (segment.end.y - segment.start.y);
-        
+        const x = Math.pow(1-t, 3) * noseStart.x + 
+                  3 * Math.pow(1-t, 2) * t * control1.x + 
+                  3 * (1-t) * Math.pow(t, 2) * control2.x + 
+                  Math.pow(t, 3) * noseEnd.x;
+        const y = Math.pow(1-t, 3) * noseStart.y + 
+                  3 * Math.pow(1-t, 2) * t * control1.y + 
+                  3 * (1-t) * Math.pow(t, 2) * control2.y + 
+                  Math.pow(t, 3) * noseEnd.y;
         return { x, y };
     };
     
-    // Function to get angle at point on zig-zag for perpendicular offset
+    // Function to get tangent (derivative) at point on curve for perpendicular offset
     const getTangentAtPoint = (t) => {
-        // Find which segment t falls into
-        let segment;
-        if (t <= 0.333) {
-            segment = segments[0];
-        } else if (t <= 0.666) {
-            segment = segments[1];
-        } else {
-            segment = segments[2];
-        }
-        
-        // Calculate angle of the segment
-        const dx = segment.end.x - segment.start.x;
-        const dy = segment.end.y - segment.start.y;
+        const dx = -3 * Math.pow(1-t, 2) * noseStart.x + 
+                   3 * Math.pow(1-t, 2) * control1.x - 6 * t * (1-t) * control1.x + 
+                   6 * t * (1-t) * control2.x - 3 * Math.pow(t, 2) * control2.x + 
+                   3 * Math.pow(t, 2) * noseEnd.x;
+        const dy = -3 * Math.pow(1-t, 2) * noseStart.y + 
+                   3 * Math.pow(1-t, 2) * control1.y - 6 * t * (1-t) * control1.y + 
+                   6 * t * (1-t) * control2.y - 3 * Math.pow(t, 2) * control2.y + 
+                   3 * Math.pow(t, 2) * noseEnd.y;
         const angle = Math.atan2(dy, dx);
-        
         return angle;
     };
 
-    // Calculate x,y position along zig-zag based on time
+    // Calculate x,y position along curve based on time
     const getDiagonalX = (d) => {
         const t = diagonalScale(d.hour);
         const point = getPointOnCurve(t);
@@ -186,8 +106,20 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
         return point.y;
     };
 
-    // Offset perpendicular to path for left/right sides
-    const perpendicularOffset = 60; // Distance from path line
+    // Offset perpendicular to curve for left/right sides
+    const perpendicularOffset = 80; // Distance from curve line
+
+
+    const stackOffset = 50; // Vertical offset between stacked points
+    const jitter = 40; // add slight jitter to all points
+
+    // Define SVG path data for custom symbols
+    const symbolPaths = {
+        "Scratch": "M128.22,119.56c25.07,14.03,30.84-15.55,18.33-30.04l-15.04-11.39c-6.38-10.42,3.58-12.79,8.72-9.46l21.53,15.84,15.27,28.45c1.52,2.08,2.38,5.22,2.47,9.6l-.43,56.95-32.81.25,2.26-31.42c-12.71.53-15.54-12.51-31.31-19.53l-13.58-4.04c2.98-8.85,10.06-12.09,24.58-5.2h0ZM129.12,81.54l15.03,11.43c3.07,3.64,5.18,8.64,5.09,13.74-4.69-4.47-7.48-5.9-11.43-6.87-5.79-2.34-8.69-5.19-6.82-8.89-3.02-3.14-4.35-6.27-1.86-9.41h0Z",
+        "Pinch": "M182.39,82.26c.23-3.7,1.25-6.97,4.41-7.33,2.12-.25,4.14.93,4.97,2.9.66,1.31,1.03,2.75,1.08,4.22.45,7.6,2.26,39.23,2.26,39.23,0,.35,0,.69-.06,1.04h.02c.66,1.91,1.16,3.86,1.51,5.84.34,2.11.52,4.24.54,6.37-.03,7.31-14.54,37.79-37.92,37.92-7.41.04-20.93-9.49-20.93-9.49l-11.34-11.34c-2.59-2.93-15.12-8.59-16.6-13.04-.99-2.02-.35-4.47,1.5-5.75,1.84-1.84,10.39.42,18.33,4.77.42.23.87.39,1.34.47,4.07.67,8.09,1.61,12.03,2.82,1.93.61,4.02-.21,5-1.98,1.32-2.41,1.8-5.96,3.49-10.84l-13.76-12.35-.26-.15-16.49,3.94c-3.44,1.29-7.27-.45-8.56-3.89,0-.02-.01-.04-.02-.05-.38-3.65.9-4.66,3.6-6.57.68-.38,1.4-.69,2.14-.93l18.65-5.91c1.15-.33,2.37-.37,3.54-.11l-1.87-.21c1.6-.04,3.18.39,4.55,1.22.57.34,1.08.77,1.53,1.26l16.14,12.97-7.83-12.92-14.39-28.52c-1.7-4.03-2.93-6.87,0-9.08,2.93-2.23,5.8-.7,8.03,2.23.3.4,16.57,25.23,21.48,33.46,0,.01,0,.02,0,.02-.05.01-1.72-6.65-5-20l.15.85-1.89-12.96s-.09-7.34,3.37-8.64c.06-.02.13-.03.19-.05,2.9-.67,5.79,1.13,6.46,4.03.17.43,9.26,30.83,11.94,41.52",
+        "Brush": "M174.96,116.79c0,.81-.66,1.46-1.46,1.46h-2.7c-.81,0-1.46-.66-1.46-1.46v-36.17c0-3.14-2.54-5.68-5.68-5.68s-5.68,2.54-5.68,5.68v36.17c0,.81-.66,1.46-1.46,1.46h-2.67c-.81,0-1.46-.66-1.46-1.46v-42.11c0-3.14-2.54-5.68-5.68-5.68s-5.68,2.54-5.68,5.68v42.11c0,.81-.66,1.46-1.46,1.46h-2.69c-.81,0-1.46-.66-1.46-1.46v-34.62c0-3.14-2.54-5.68-5.68-5.68h0c-3.14,0-5.68,2.54-5.68,5.68v60.58c0,1.23-1.42,1.91-2.38,1.14l-12.38-9.91c-2.82-2.26-6.89-2.09-9.5.41l-.45.43c-2.18,2.08-2.39,5.48-.5,7.81l25.21,30.99c3.36,4.37,8.57,6.93,14.08,6.93h15.01c18.34,0,33.2-14.87,33.21-33.2v-53.96c0-2.33-1.89-4.22-4.22-4.22h-2.93c-2.33,0-4.18,4.51-4.18,6.84-.01,6.93-.03,13.86-.04,20.79Z",
+        "Touch": "M134.67,60.48c-7.48,0-13.57,6.08-13.57,13.57v41.91c-4.41-5.02-11.98-6.13-17.7-2.33-6.23,4.18-7.93,12.59-3.75,18.82l14.31,21.47c6.3,9.43,16.87,15.09,28.22,15.09h24.72c14.05,0,25.44-11.38,25.44-25.44v-25.44c0-7.48-6.08-13.57-13.57-13.57-.95,0-1.87.11-2.76.28-2.48-3.26-6.4-5.36-10.81-5.36-1.46,0-2.86.23-4.18.66-2.46-3.48-6.51-5.74-11.09-5.74-.57,0-1.14.04-1.7.11v-20.46c0-7.48-6.08-13.57-13.57-13.57Z"
+    };
 
     // Create color scale for location
     const locationColors = d3.scaleOrdinal()
@@ -202,7 +134,7 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     // Create size scale for number_of_times
     const sizeScale = d3.scaleLinear()
         .domain([1, d3.max(data, d => +d.number_of_times)])
-        .range([700, 4000]); // Size in square pixels for d3.symbol
+        .range([1000, 8000]); // Size in square pixels for d3.symbol
 
     //create opacity scale for touch type
     const opacityScale = d3.scaleOrdinal()
@@ -212,63 +144,81 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     // Group data by hour and side to stack overlapping points
     const grouped = d3.group(data, d => `${d.hour.getTime()}-${d.side}`);
     
-    const stackOffset = 30; // Vertical offset between stacked points
-    const jitter = 10; // add slight jitter to all points
-    
-    // Add stacking index to each point
+    // Add stacking index and calculate initial positions
     grouped.forEach(group => {
         group.forEach((d, i) => {
             d.stackIndex = i;
             d.jitterX = (Math.random() - 0.5) * jitter;
             d.jitterY = (Math.random() - 0.5) * jitter;
+            
+            // Calculate initial position
+            const t = diagonalScale(d.hour);
+            const basePoint = getPointOnCurve(t);
+            const angle = getTangentAtPoint(t);
+            
+            // Handle offset based on side (perpendicular to curve)
+            let offsetX = 0, offsetY = 0;
+            if (d.side === "Left") {
+                offsetX = -perpendicularOffset * Math.sin(angle);
+                offsetY = perpendicularOffset * Math.cos(angle);
+            } else if (d.side === "Right") {
+                offsetX = perpendicularOffset * Math.sin(angle);
+                offsetY = -perpendicularOffset * Math.cos(angle);
+            }
+            
+            // Stack along the perpendicular direction
+            const stackDirection = d.side === "Left" ? -1 : (d.side === "Right" ? 1 : 0);
+            const stackX = d.stackIndex * stackOffset * stackDirection * Math.sin(angle);
+            const stackY = -d.stackIndex * stackOffset * stackDirection * Math.cos(angle);
+            
+            // Store initial position
+            d.x = basePoint.x + offsetX + stackX + d.jitterX;
+            d.y = basePoint.y + offsetY + stackY + d.jitterY;
+            
+            // Store angle for rotation
+            d.angle = angle;
+            
+            // Calculate radius for collision detection (50% of actual radius to allow some overlap)
+            const symbolSize = sizeScale(+d.number_of_times);
+            d.radius = Math.sqrt(symbolSize / Math.PI) * 1; // 50% overlap allowed
         });
     });
 
+    // Use force simulation to prevent overlap
+    const simulation = d3.forceSimulation(data)
+        .force("collide", d3.forceCollide().radius(d => d.radius).strength(0.8))
+        .force("x", d3.forceX(d => d.x).strength(0.5)) // Pull back toward original x position
+        .force("y", d3.forceY(d => d.y).strength(0.5)) // Pull back toward original y position
+        .stop();
+    
+    // Run simulation iterations
+    for (let i = 0; i < 300; i++) simulation.tick();
+
     // Add points to the SVG using path elements for different shapes
-    svg.selectAll("path.datapoint")
+    const paths = svg.selectAll("path.datapoint")
         .data(data)
         .enter()
         .append("path")
         .attr("class", "datapoint")
         .attr("d", d => {
-            const symbolType = d3.symbolCircle; // bodyPartSymbol(d.part_of_body) || d3.symbolCircle;
+            // Use d3.symbol with bodyPartSymbol scale
+            const symbolType = bodyPartSymbol(d.part_of_body);
             const symbolSize = sizeScale(+d.number_of_times);
             return d3.symbol().type(symbolType).size(symbolSize)();
         })
         .attr("transform", d => {
-            const t = diagonalScale(d.hour);
-            const basePoint = getPointOnCurve(t);
-            const angle = getTangentAtPoint(t);
-            
-            const baseX = basePoint.x;
-            const baseY = basePoint.y;
-            
-            // Handle offset based on side (perpendicular to curve)
-            let offsetX = 0, offsetY = 0;
-            if (d.side === "Left") {
-                // Perpendicular to the left of the tangent
-                offsetX = -perpendicularOffset * Math.sin(angle);
-                offsetY = perpendicularOffset * Math.cos(angle);
-            } else if (d.side === "Right") {
-                // Perpendicular to the right of the tangent
-                offsetX = perpendicularOffset * Math.sin(angle);
-                offsetY = -perpendicularOffset * Math.cos(angle);
-            }
-            // If side is N/A (empty string), offsetX and offsetY remain 0
-            
-            // Stack along the perpendicular direction as well
-            const stackDirection = d.side === "Left" ? -1 : (d.side === "Right" ? 1 : 0);
-            const stackX = d.stackIndex * stackOffset * stackDirection * Math.sin(angle);
-            const stackY = -d.stackIndex * stackOffset * stackDirection * Math.cos(angle);
-            
-            const finalX = baseX + offsetX + stackX + d.jitterX;
-            const finalY = baseY + offsetY + stackY + d.jitterY;
-            
-            return `translate(${finalX}, ${finalY})`;
+            // Use adjusted position from force simulation
+            const rotationAngle = (d.angle * 180 / Math.PI) + (d.side === "Right" ? -180 : 0);
+            return `translate(${d.x}, ${d.y}) rotate(${rotationAngle})`;
         })
+        // .attr("fill", "none") // No fill, only stroke for the symbol paths
+        // fill with color based on location
         .attr("fill", d => locationColors(d.location))
-        .attr("stroke", "black", "stroke-width", 10)
-        // .attr("opacity", d => opacityScale(d.type));
+        .attr("opacity", d => opacityScale(d.type))
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+             
+    
 
 
 
@@ -279,50 +229,17 @@ d3.csv("nosetouch_data_prepared_trimmed.csv").then(data => {
     const diagonalAxis = svg.append("g")
         .attr("class", "diagonal-axis");
 
-    // Draw the zig-zag axis (Finder icon nose style)
+    // Draw the curved nose axis using cubic bezier
     diagonalAxis.append("path")
-        .attr("d", `M ${zigStart.x} ${zigStart.y} L ${zigPeak1.x} ${zigPeak1.y} L ${zigPeak2.x} ${zigPeak2.y} L ${zigEnd.x} ${zigEnd.y}`)
+        .attr("d", `M ${noseStart.x} ${noseStart.y} C ${control1.x} ${control1.y}, ${control2.x} ${control2.y}, ${noseEnd.x} ${noseEnd.y}`)
         .attr("stroke", "black")
-        .attr("stroke-width", 10)
-        .attr("fill", "none");
+        .attr("stroke-width", 20)
+        .attr("fill", "none")
+        //send to back so points are on top
+        .lower();
 
-    // Add ticks along the zig-zag at every midnight (00:00)
-    const tickTimes = d3.timeDay.range(
-        d3.min(data, d => d.hour),
-        d3.max(data, d => d.hour),
-        1
-    );
-    
-    console.log("Tick times:", tickTimes);
-    console.log("Number of ticks:", tickTimes.length);
-    
-    tickTimes.forEach(tick => {
-        const t = diagonalScale(tick);
-        const point = getPointOnCurve(t);
-        const angle = getTangentAtPoint(t);
-        
-        console.log("Tick:", tick, "t:", t, "x:", point.x, "y:", point.y);
-        
-        // Tick mark perpendicular to path
-        const tickLength = 10;
-        diagonalAxis.append("line")
-            .attr("x1", point.x)
-            .attr("y1", point.y)
-            .attr("x2", point.x - tickLength * Math.sin(angle))
-            .attr("y2", point.y + tickLength * Math.cos(angle))
-            .attr("stroke", "black")
-            .attr("stroke-width", 4);
-        
-        // Tick label
-        const labelOffset = 20;
-        diagonalAxis.append("text")
-            .attr("x", point.x - labelOffset * Math.sin(angle))
-            .attr("y", point.y + labelOffset * Math.cos(angle))
-            .attr("text-anchor", "middle")
-            .attr("font-size", "20px")
-            .text(d3.timeFormat("%b %d")(tick))
-            .attr("transform", `rotate(${angle * 180 / Math.PI}, ${point.x - labelOffset * Math.sin(angle)}, ${point.y + labelOffset * Math.cos(angle)})`);
-    });
+
+
 
 });
 
