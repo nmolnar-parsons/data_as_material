@@ -1,0 +1,33 @@
+query,id,name,latitude,longitude,elevation,country_code,country,admin1,admin2,timezone,population
+New York City,5128581,New York,40.71427,-74.00597,10.0,US,United States,New York,,America/New_York,8804190
+Chicago,4887398,Chicago,41.85003,-87.65005,179.0,US,United States,Illinois,Cook,America/Chicago,2664452
+Los Angeles,5368361,Los Angeles,34.05223,-118.24368,89.0,US,United States,California,Los Angeles,America/Los_Angeles,3820914
+Washington,4140963,Washington,38.89511,-77.03637,7.0,US,United States,District of Columbia,,America/New_York,689545
+San Francisco,5391959,San Francisco,37.77493,-122.41942,16.0,US,United States,California,San Francisco County,America/Los_Angeles,864816
+Dallas,4684888,Dallas,32.78306,-96.80667,128.0,US,United States,Texas,Dallas,America/Chicago,1300092
+Miami,4164138,Miami,25.77427,-80.19366,2.0,US,United States,Florida,Miami-Dade County,America/New_York,441003
+Seattle,5809844,Seattle,47.60621,-122.33207,56.0,US,United States,Washington,King,America/Los_Angeles,737015
+Boston,4930956,Boston,42.35843,-71.05977,14.0,US,United States,Massachusetts,Suffolk,America/New_York,653833
+Denver,5419384,Denver,39.73915,-104.9847,1609.0,US,United States,Colorado,Denver,America/Denver,729019
+Houston,4699066,Houston,29.76328,-95.36327,12.0,US,United States,Texas,Harris,America/Chicago,2314157
+Phoenix,5308655,Phoenix,33.44838,-112.07404,331.0,US,United States,Arizona,Maricopa,America/Phoenix,1650070
+Portland,5746545,Portland,45.52345,-122.67621,12.0,US,United States,Oregon,Multnomah,America/Los_Angeles,652503
+Philadelphia,4560349,Philadelphia,39.95238,-75.16362,12.0,US,United States,Pennsylvania,Philadelphia,America/New_York,1573916
+Honolulu,5856195,Honolulu,21.30694,-157.85834,5.0,US,United States,Hawaii,Honolulu,Pacific/Honolulu,350964
+Salt Lake City,5780993,Salt Lake City,40.76078,-111.89105,1299.0,US,United States,Utah,Salt Lake,America/Denver,215548
+Nashville,4644585,Nashville,36.16589,-86.78444,170.0,US,United States,Tennessee,Davidson,America/Chicago,689447
+Oklahoma City,4544349,Oklahoma City,35.46756,-97.51643,366.0,US,United States,Oklahoma,Oklahoma,America/Chicago,681054
+Las Vegas,5506956,Las Vegas,36.17497,-115.13722,610.0,US,United States,Nevada,Clark,America/Los_Angeles,623747
+Baltimore,4347778,Baltimore,39.29038,-76.61219,10.0,US,United States,Maryland,Baltimore,America/New_York,576498
+Kansas City,4393217,Kansas City,39.09973,-94.57857,274.0,US,United States,Missouri,Jackson,America/Chicago,475378
+Omaha,5074472,Omaha,41.25626,-95.94043,323.0,US,United States,Nebraska,Douglas,America/Chicago,486051
+Minneapolis,5037649,Minneapolis,44.97997,-93.26384,253.0,US,United States,Minnesota,Hennepin,America/Chicago,410939
+Cleveland,5150529,Cleveland,41.4995,-81.69541,199.0,US,United States,Ohio,Cuyahoga,America/New_York,388072
+Toronto,6167865,Toronto,43.70643,-79.39864,161.0,CA,Canada,Ontario,,America/Toronto,2600000
+Ottawa,6094817,Ottawa,45.41117,-75.69812,71.0,CA,Canada,Ontario,Ottawa,America/Toronto,812129
+Halifax,6324729,Halifax,44.64269,-63.57688,60.0,CA,Canada,Nova Scotia,Halifax Regional Municipality,America/Halifax,439819
+Mexico City,3530597,Mexico City,19.42847,-99.12766,2240.0,MX,Mexico,Mexico City,,America/Mexico_City,12294193
+Havana,3553478,Havana,23.13302,-82.38304,41.0,CU,Cuba,Havana,,America/Havana,2163824
+Montreal,6077243,Montreal,45.50884,-73.58781,216.0,CA,Canada,Quebec,Montréal,America/Toronto,1762949
+Tijuana,3981609,Tijuana,32.5027,-117.00371,97.0,MX,Mexico,Baja California,Tijuana,America/Tijuana,1922523
+Panama City,3703443,Panama City,8.9936,-79.51973,17.0,PA,Panama,Provincia de Panamá,Panamá District,America/Panama,408168
