@@ -1,0 +1,4 @@
+.env
+.env.*
+!.env.example
+04_Data-Experience/.env

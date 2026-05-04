@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weather Similarity</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="layout-main">
+    <div class="container layout-intro">
+      <h1>Weather Similarity Finder</h1>
+
+      <div class="mode-toggle-wrap">
+        <label class="mode-toggle">
+          <input id="presentationModeToggle" type="checkbox" checked>
+          <span>Presentation mode</span>
+        </label>
+      </div>
+
+      <p id="status" class="status" role="status" aria-live="polite">Ready.</p>
+
+      <div id="classicPanel" class="classic-panel" hidden>
+        <p class="subtitle">Find the 5 closest historical weather days to your current weather and fetch NYT articles for those days.</p>
+
+        <section class="controls">
+          <button id="runButton" type="button">Find 5 Similar Weather Days</button>
+        </section>
+
+        <section class="today-weather">
+          <h2>Today's Weather</h2>
+          <div id="todayWeatherCard" class="today-card">
+            Run the matcher to load current weather details.
+          </div>
+        </section>
+
+        <section class="results">
+          <h2>Nearest Historical Days</h2>
+          <div class="table-wrap">
+            <table id="resultsTable">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Date</th>
+                  <th>City</th>
+                  <th>Weather</th>
+                  <th>Temp (C)</th>
+                  <th>Feels (C)</th>
+                  <th>Rain (mm)</th>
+                  <th>Snow (cm)</th>
+                  <th>Precip Hours</th>
+                  <th>Wind (km/h)</th>
+                  <th>Gust (km/h)</th>
+                  <th>Cloud (%)</th>
+                  <th>Distance</th>
+                  <th>NYT Article</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <details>
+          <summary>Debug: Current Normalized Vector</summary>
+          <pre id="debugOutput">No run yet.</pre>
+        </details>
+      </div>
+    </div>
+
+    <section id="presentationPanel" class="presentation-panel presentation-panel--wide">
+      <div class="presentation-panel-inner">
+        <div id="presentationStory" class="presentation-story" role="region" aria-label="Today’s weather prompt">
+          Loading…
+        </div>
+        <div class="presentation-actions">
+          <button id="searchHistoryButton" type="button" disabled>Search through history</button>
+        </div>
+        <section class="presentation-results" aria-live="polite">
+          <h2 class="presentation-results-heading">Similar days</h2>
+          <div class="presentation-similar-region">
+            <div class="presentation-table-wrap">
+              <table class="presentation-matches" aria-label="Historical days with similar weather">
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Temp</th>
+                    <th scope="col">Rain / snow</th>
+                    <th scope="col">Cloud</th>
+                    <th scope="col">Wind</th>
+                    <th scope="col">NYTimes headline</th>
+                  </tr>
+                </thead>
+                <tbody id="presentationCards"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
