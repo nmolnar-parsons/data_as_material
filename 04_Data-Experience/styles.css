@@ -400,13 +400,38 @@ body.mode-pres .presentation-top-right {
 }
 
 body.mode-pres.pres-sky--day .presentation-sky-icon {
-  color: rgba(28, 52, 96, 0.78);
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.45));
+  color: #ffeb3b;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
 }
 
 body.mode-pres.pres-sky--night .presentation-sky-icon {
-  color: rgba(255, 255, 255, 0.9);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+  color: #ffeb3b;
+  filter: drop-shadow(0 0 10px rgba(255, 235, 59, 0.55))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+/* Intro column: readable on sky gradient by time of day */
+body.mode-pres.pres-sky--day .layout-intro {
+  color: #000;
+}
+
+body.mode-pres.pres-sky--day .layout-intro .mode-suffix,
+body.mode-pres.pres-sky--day .layout-intro .status {
+  color: #000;
+}
+
+body.mode-pres.pres-sky--night .layout-intro {
+  color: #fff;
+}
+
+body.mode-pres.pres-sky--night .layout-intro .mode-suffix,
+body.mode-pres.pres-sky--night .layout-intro .status {
+  color: #fff;
+}
+
+body.mode-pres.pres-sky--night .layout-intro .mode-title:hover,
+body.mode-pres.pres-sky--night .layout-intro .mode-title:focus-visible {
+  color: #a6d4ff;
 }
 
 /* Unit toggle (C / F) — nested in presentation-top-right in presentation mode */
