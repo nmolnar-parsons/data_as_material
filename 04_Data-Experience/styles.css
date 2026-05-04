@@ -4,10 +4,20 @@
 
 body {
   margin: 0;
+  padding-bottom: 2.5rem;
   font-family: Arial, sans-serif;
   line-height: 1.4;
   color: #1a1a1a;
   background: #f4f6f8;
+}
+
+body.mode-pres {
+  background: var(
+    --pres-sky-gradient,
+    linear-gradient(to bottom, rgb(126, 200, 240) 0%, rgb(214, 235, 255) 100%)
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 .layout-main {
@@ -18,41 +28,61 @@ body {
 
 .container {
   max-width: 1040px;
-  margin: 2rem auto;
+  margin: 0;
   padding: 1rem;
 }
 
-.layout-intro {
-  margin-bottom: 0;
+.layout-top {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  max-width: 1580px;
   width: 100%;
+  margin: 2rem auto 1rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.layout-intro {
+  flex: 1 1 320px;
+  min-width: 280px;
+  max-width: 520px;
+  margin: 0;
+  padding: 0;
 }
 
 h1 {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.mode-title {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+  outline: none;
+}
+
+.mode-title:hover,
+.mode-title:focus-visible {
+  color: #1f6feb;
+}
+
+.mode-title:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.mode-suffix {
+  font-weight: 400;
+  color: #57606a;
+  font-size: 0.7em;
+  letter-spacing: 0.01em;
 }
 
 .subtitle {
   margin-top: 0;
   color: #444;
-}
-
-.mode-toggle-wrap {
-  margin: 0.75rem 0 1rem;
-}
-
-.mode-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  font-size: 0.95rem;
-  user-select: none;
-}
-
-.mode-toggle input {
-  width: 1.1rem;
-  height: 1.1rem;
-  accent-color: #1f6feb;
 }
 
 .controls {
@@ -67,7 +97,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin: 1.25rem 0 1.75rem;
+  margin: 1.1rem 0 0;
 }
 
 button {
@@ -141,33 +171,31 @@ pre {
 
 /* Presentation mode */
 .presentation-panel {
-  margin-top: 0;
-}
-
-.presentation-panel--wide {
-  width: 100%;
-  max-width: none;
-  box-sizing: border-box;
-  padding: 0 1rem 2.5rem;
-}
-
-.presentation-panel-inner {
-  width: 100%;
-  max-width: 1580px;
-  margin: 0 auto;
-  box-sizing: border-box;
+  flex: 1 1 420px;
+  min-width: 320px;
+  max-width: 720px;
+  margin: 0;
+  padding: 0;
 }
 
 .presentation-story {
-  background: linear-gradient(135deg, #ffffff 0%, #eef4ff 100%);
+  background: var(
+    --pres-story-gradient,
+    linear-gradient(135deg, #ffffff 0%, #eef4ff 100%)
+  );
   border: none;
   border-left: 5px solid #1f6feb;
   border-radius: 0 12px 12px 0;
   padding: 1.35rem 1.5rem 1.45rem 1.4rem;
   font-size: 1.35rem;
   line-height: 1.55;
-  max-width: min(52ch, 100%);
+  width: 100%;
   box-shadow: 0 2px 14px rgba(15, 61, 129, 0.1);
+}
+
+.presentation-narrative {
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .presentation-lede {
@@ -185,27 +213,41 @@ pre {
   color: #a40e26;
 }
 
+.presentation-similar-section {
+  width: 100%;
+  max-width: 1580px;
+  margin: 0 auto;
+  padding: 0 1rem 2.5rem;
+  box-sizing: border-box;
+}
+
 .presentation-results-heading {
   font-size: 1.05rem;
   margin: 1.5rem 0 0.65rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: #1c2430;
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .presentation-similar-region {
-  background: linear-gradient(165deg, #1e2a3d 0%, #141c28 55%, #0f141d 100%);
+  background: linear-gradient(180deg, #f6f8fc 0%, #eef2f8 100%);
+  border: 1px solid #dde4ee;
   border-radius: 12px;
   padding: 1rem 1rem 1.15rem;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 8px 24px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 4px 14px rgba(20, 40, 80, 0.06);
+  max-width: 75%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .presentation-table-wrap {
   overflow-x: auto;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid #dde4ee;
+  background: #fff;
 }
 
 .presentation-matches {
@@ -224,21 +266,21 @@ pre {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #c8d4e8;
-  background: rgba(0, 0, 0, 0.35);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #475569;
+  background: #e3e9f2;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   white-space: nowrap;
 }
 
 .presentation-matches tbody td {
   padding: 0.55rem 0.65rem;
   vertical-align: top;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   background: #fff;
 }
 
 .presentation-matches tbody tr:nth-child(even) td {
-  background: #f0f4fa;
+  background: #f3f6fb;
 }
 
 .presentation-matches tbody tr:last-child td {
@@ -322,4 +364,128 @@ pre {
 .sky-mixed {
   color: #6e7781;
   font-weight: 700;
+}
+
+/* Presentation top-right: celestial icon + unit toggle */
+.presentation-top-right {
+  display: none;
+}
+
+body.mode-pres .presentation-top-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.presentation-top-right .unit-toggle {
+  pointer-events: auto;
+}
+
+.presentation-sky-decor {
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 36px;
+}
+
+.presentation-sky-icon {
+  flex-shrink: 0;
+}
+
+body.mode-pres.pres-sky--day .presentation-sky-icon {
+  color: rgba(28, 52, 96, 0.78);
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.45));
+}
+
+body.mode-pres.pres-sky--night .presentation-sky-icon {
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+/* Unit toggle (C / F) — nested in presentation-top-right in presentation mode */
+.unit-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: none;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 999px;
+  padding: 2px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.presentation-top-right .unit-toggle {
+  position: static;
+  display: inline-flex;
+}
+
+body.mode-pres .presentation-top-right .unit-toggle {
+  display: inline-flex;
+}
+
+.unit-btn {
+  background: transparent;
+  color: #444;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.unit-btn.is-active {
+  background: #1f6feb;
+  color: #fff;
+}
+
+/* Data mode: hide presentation side column and similar-days section */
+body.mode-data #presentationPanel,
+body.mode-data #presentationSimilar {
+  display: none;
+}
+
+body.mode-data .layout-intro {
+  max-width: 1040px;
+}
+
+/* Page footnote: Horizon attribution */
+.site-attribution {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 0.4rem 1rem 0.5rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-align: center;
+  color: rgba(40, 48, 60, 0.78);
+  background: rgba(244, 246, 248, 0.94);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.mode-pres .site-attribution {
+  color: rgba(30, 38, 50, 0.85);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.site-attribution a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.site-attribution a:hover {
+  color: #0550ae;
 }

@@ -1,4 +1,4 @@
-const TOP_N_CLASSIC = 5;
+const TOP_N_CLASSIC = 20;
 const ARTICLE_LOOKUP_CLASSIC = TOP_N_CLASSIC;
 const TOP_N_PRESENTATION = 7;
 const ARTICLE_LOOKUP_PRESENTATION = TOP_N_PRESENTATION;
@@ -8,6 +8,7 @@ const RAW_CSV_PATH = "./weather-data/combined/weather_history.csv";
 const OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
 const PRESENTATION_ROW_CYCLE_MS = 900;
 const PRESENTATION_HEADER_TO_BODY_MS = 400;
+const PRESENTATION_SKY_REFRESH_MS = 15 * 60 * 1000;
 
 const DAILY_FIELDS = [
   "weather_code",
@@ -21,7 +22,9 @@ const DAILY_FIELDS = [
   "wind_gusts_10m_max",
   "wind_speed_10m_mean",
   "dew_point_2m_mean",
-  "cloud_cover_mean"
+  "cloud_cover_mean",
+  "sunrise",
+  "sunset"
 ];
 
 let scalerConfigCache = null;
@@ -30,6 +33,11 @@ let rawHistoryRowsCache = null;
 let rawHistoryIndexCache = null;
 
 let presentationCoords = null;
+let isPresentationMode = true;
+let currentUnit = "C";
+let lastForecastMeta = null;
+let lastPresentationRows = null;
+let presentationSkyIntervalId = null;
 
 const WMO_DESCRIPTIONS = {
   0: "Clear sky",
@@ -62,12 +70,17 @@ const WMO_DESCRIPTIONS = {
   99: "Thunderstorm with heavy hail"
 };
 
-const presentationModeToggle = document.getElementById("presentationModeToggle");
+const modeTitle = document.getElementById("modeTitle");
+const modeSuffix = document.getElementById("modeSuffix");
 const presentationPanel = document.getElementById("presentationPanel");
+const presentationSimilar = document.getElementById("presentationSimilar");
 const classicPanel = document.getElementById("classicPanel");
-const presentationStory = document.getElementById("presentationStory");
+const presentationNarrative = document.getElementById("presentationNarrative");
 const searchHistoryButton = document.getElementById("searchHistoryButton");
 const presentationCards = document.getElementById("presentationCards");
+const unitToggleEl = document.getElementById("unitToggle");
+const presentationSkySun = document.getElementById("presentationSkySun");
+const presentationSkyMoon = document.getElementById("presentationSkyMoon");
 
 const runButton = document.getElementById("runButton");
 const statusEl = document.getElementById("status");
@@ -77,30 +90,81 @@ const todayWeatherCard = document.getElementById("todayWeatherCard");
 
 runButton.addEventListener("click", runMatcher);
 searchHistoryButton.addEventListener("click", onPresentationSearchAndReveal);
-presentationModeToggle.addEventListener("change", onPresentationModeChange);
+
+modeTitle.addEventListener("click", toggleMode);
+modeTitle.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    toggleMode();
+  }
+});
+
+unitToggleEl.addEventListener("click", (event) => {
+  const button = event.target.closest(".unit-btn");
+  if (!button) return;
+  const unit = button.dataset.unit;
+  if (unit !== "C" && unit !== "F") return;
+  if (unit === currentUnit) return;
+  setUnit(unit);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
-  syncPanelsFromToggle();
-  if (presentationModeToggle.checked) {
+  syncPanels();
+  if (isPresentationMode) {
     initPresentationWeather();
   } else {
     setStatus("Ready.");
   }
 });
 
-function syncPanelsFromToggle() {
-  const pres = presentationModeToggle.checked;
-  presentationPanel.hidden = !pres;
-  classicPanel.hidden = pres;
+function syncPanels() {
+  document.body.classList.toggle("mode-pres", isPresentationMode);
+  document.body.classList.toggle("mode-data", !isPresentationMode);
+  presentationPanel.hidden = !isPresentationMode;
+  if (presentationSimilar) {
+    presentationSimilar.hidden = !isPresentationMode;
+  }
+  classicPanel.hidden = isPresentationMode;
+  modeSuffix.textContent = isPresentationMode ? " - presentation mode" : " - data mode";
+  modeTitle.setAttribute("aria-pressed", String(isPresentationMode));
+  if (!isPresentationMode) {
+    clearPresentationSkyTheme();
+  }
 }
 
-function onPresentationModeChange() {
-  syncPanelsFromToggle();
-  if (presentationModeToggle.checked) {
+function toggleMode() {
+  isPresentationMode = !isPresentationMode;
+  syncPanels();
+  if (isPresentationMode) {
     initPresentationWeather();
   } else {
     setStatus("Ready.");
   }
+}
+
+function setUnit(unit) {
+  currentUnit = unit;
+  unitToggleEl.querySelectorAll(".unit-btn").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.unit === unit);
+  });
+  if (lastForecastMeta) {
+    presentationNarrative.innerHTML = buildPresentationNarrativeHtml(
+      lastForecastMeta.daily,
+      lastForecastMeta
+    );
+  }
+  if (Array.isArray(lastPresentationRows) && lastPresentationRows.length) {
+    rerenderPresentationRowsKeepVisibility(lastPresentationRows);
+  }
+}
+
+function rerenderPresentationRowsKeepVisibility(rows) {
+  presentationCards.innerHTML = rows
+    .map((row) => buildPresentationTableRowHtml(row))
+    .join("");
+  presentationCards
+    .querySelectorAll(".presentation-reveal-cell")
+    .forEach((cell) => cell.classList.add("presentation-reveal--visible"));
 }
 
 function setStatus(message) {
@@ -127,6 +191,33 @@ function asNumber(value, fallback = NaN) {
 function formatNumber(value, digits = 1, fallback = "-") {
   const num = asNumber(value);
   return Number.isFinite(num) ? num.toFixed(digits) : fallback;
+}
+
+function cToF(c) {
+  return (Number(c) * 9) / 5 + 32;
+}
+
+function formatTemp(celsius, digits = 1) {
+  const v = Number(celsius);
+  if (!Number.isFinite(v)) return "-";
+  return currentUnit === "F"
+    ? `${cToF(v).toFixed(digits)}°F`
+    : `${v.toFixed(digits)}°C`;
+}
+
+function formatFullDate(dateStr) {
+  const parts = String(dateStr).split("-").map(Number);
+  if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) {
+    return String(dateStr);
+  }
+  const [y, m, d] = parts;
+  const date = new Date(y, m - 1, d);
+  if (Number.isNaN(date.getTime())) return String(dateStr);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
 }
 
 function formatWeatherCode(code) {
@@ -211,7 +302,7 @@ function buildPresentationNarrativeHtml(daily, forecastMeta) {
   const wmoLower = wmoLabel.charAt(0).toLowerCase() + wmoLabel.slice(1);
   const skyClass = skyCssClassForDaily(daily);
   const tClass = tempCssClass(daily.temperature_2m_mean);
-  const tempStr = `${formatNumber(daily.temperature_2m_mean)}°C`;
+  const tempStr = formatTemp(daily.temperature_2m_mean);
   const tz = forecastMeta.timezone ? escapeHtml(String(forecastMeta.timezone)) : "your area";
   const lat = forecastMeta.latitude != null ? forecastMeta.latitude : presentationCoords?.latitude;
   const lon = forecastMeta.longitude != null ? forecastMeta.longitude : presentationCoords?.longitude;
@@ -230,9 +321,12 @@ function buildPresentationNarrativeHtml(daily, forecastMeta) {
 }
 
 async function initPresentationWeather() {
+  stopPresentationSkyRefresh();
+  clearPresentationSkyTheme();
   searchHistoryButton.disabled = true;
   presentationCards.innerHTML = "";
-  presentationStory.innerHTML = "<p>Locating you…</p>";
+  lastPresentationRows = null;
+  presentationNarrative.innerHTML = "<p>Locating you…</p>";
   setStatus("Getting location…");
 
   try {
@@ -241,12 +335,17 @@ async function initPresentationWeather() {
     presentationCoords = { latitude, longitude };
     setStatus("Fetching current weather…");
     const forecastMeta = await fetchCurrentWeather(latitude, longitude);
-    presentationStory.innerHTML = buildPresentationNarrativeHtml(forecastMeta.daily, forecastMeta);
+    lastForecastMeta = forecastMeta;
+    presentationNarrative.innerHTML = buildPresentationNarrativeHtml(forecastMeta.daily, forecastMeta);
+    applyPresentationSkyThemeFromMeta(forecastMeta);
+    startPresentationSkyRefresh();
     searchHistoryButton.disabled = false;
     setStatus("Ready. Search through history to find similar days and reveal them.");
   } catch (error) {
     presentationCoords = null;
-    presentationStory.innerHTML = `<p class="presentation-error">${escapeHtml(error.message)}</p>`;
+    lastForecastMeta = null;
+    clearPresentationSkyTheme();
+    presentationNarrative.innerHTML = `<p class="presentation-error">${escapeHtml(error.message)}</p>`;
     setStatus(`Error: ${error.message}`);
   }
 }
@@ -259,6 +358,7 @@ async function onPresentationSearchAndReveal() {
 
   searchHistoryButton.disabled = true;
   presentationCards.innerHTML = "";
+  lastPresentationRows = null;
   setStatus("Loading archive, matching, and revealing…");
 
   try {
@@ -267,13 +367,15 @@ async function onPresentationSearchAndReveal() {
       latitude,
       longitude,
       topN: TOP_N_PRESENTATION,
-      articleLimit: ARTICLE_LOOKUP_PRESENTATION
+      articleLimit: ARTICLE_LOOKUP_PRESENTATION,
+      dedupeByLocation: true
     });
     const rows = result.nearestWithArticles;
     if (!rows.length) {
       setStatus("No similar days found.");
       return;
     }
+    lastPresentationRows = rows;
     revealPresentationRows(rows);
     setStatus(`Done. Showing ${rows.length} similar days (one row per city / location).`);
   } catch (error) {
@@ -324,9 +426,9 @@ function buildPresentationTableRowHtml(row) {
   const locText = `${escapeHtml(row.city)} · ${formatNumber(row.latitude, 1)}°, ${formatNumber(row.longitude, 1)}°`;
   return `
     <tr>
-      <td class="pres-phase1 presentation-reveal-cell">${escapeHtml(row.date)}</td>
+      <td class="pres-phase1 presentation-reveal-cell">${escapeHtml(formatFullDate(row.date))}</td>
       <td class="pres-phase1 presentation-reveal-cell presentation-cell--loc">${locText}</td>
-      <td class="pres-phase2 presentation-reveal-cell"><span class="${tempCssClass(row.temp_mean_c)}">${formatNumber(row.temp_mean_c)}°C</span></td>
+      <td class="pres-phase2 presentation-reveal-cell"><span class="${tempCssClass(row.temp_mean_c)}">${formatTemp(row.temp_mean_c)}</span></td>
       <td class="pres-phase2 presentation-reveal-cell">${rainSnow}</td>
       <td class="pres-phase2 presentation-reveal-cell">${formatNumber(row.cloud_cover_mean_pct)}%</td>
       <td class="pres-phase2 presentation-reveal-cell">${formatNumber(row.wind_speed_mean_kmh)} km/h</td>
@@ -377,7 +479,8 @@ async function runMatcher() {
       latitude,
       longitude,
       topN: TOP_N_CLASSIC,
-      articleLimit: ARTICLE_LOOKUP_CLASSIC
+      articleLimit: ARTICLE_LOOKUP_CLASSIC,
+      dedupeByLocation: false
     });
 
     renderTodayWeather(result.liveDaily, latitude, longitude);
@@ -400,7 +503,7 @@ async function runMatcher() {
   }
 }
 
-async function runSimilarityPipeline({ latitude, longitude, topN, articleLimit }) {
+async function runSimilarityPipeline({ latitude, longitude, topN, articleLimit, dedupeByLocation = true }) {
   const [scalerConfig, historyRows, rawHistoryRows] = await Promise.all([
     loadScalerConfig(),
     loadHistoryRows(),
@@ -418,7 +521,7 @@ async function runSimilarityPipeline({ latitude, longitude, topN, articleLimit }
   const liveVector = normalizeLiveVector(engineered, scalerConfig);
 
   setStatus("Calculating nearest historical days...");
-  const nearest = getNearestRows(liveVector, historyRows, scalerConfig.feature_cols, topN);
+  const nearest = getNearestRows(liveVector, historyRows, scalerConfig.feature_cols, topN, dedupeByLocation);
   const nearestWithRaw = attachRawHistoryFields(nearest);
 
   setStatus("Looking up NYT articles for matches...");
@@ -482,12 +585,182 @@ async function fetchCurrentWeather(lat, lon) {
     daily[key] = Array.isArray(value) ? value[0] : value;
   }
 
+  const utcOffsetSeconds =
+    payload.utc_offset_seconds != null && Number.isFinite(Number(payload.utc_offset_seconds))
+      ? Number(payload.utc_offset_seconds)
+      : 0;
+
   return {
     daily,
     timezone: payload.timezone != null ? String(payload.timezone) : "",
     latitude: payload.latitude != null ? Number(payload.latitude) : lat,
-    longitude: payload.longitude != null ? Number(payload.longitude) : lon
+    longitude: payload.longitude != null ? Number(payload.longitude) : lon,
+    utc_offset_seconds: utcOffsetSeconds
   };
+}
+
+/** Open-Meteo daily sunrise/sunset are local wall times; DST transition days may be ~1h off. */
+function parseOpenMeteoLocalInstant(isoStr, utcOffsetSeconds) {
+  const m = String(isoStr).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return NaN;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  const h = Number(m[4]);
+  const mi = Number(m[5]);
+  const s = m[6] != null ? Number(m[6]) : 0;
+  if (![y, mo, d, h, mi].every((n) => Number.isFinite(n))) return NaN;
+  const sec = Number.isFinite(s) ? s : 0;
+  return Date.UTC(y, mo - 1, d, h, mi, sec) - utcOffsetSeconds * 1000;
+}
+
+function isDayLocalHeuristic(utcOffsetSeconds) {
+  if (!Number.isFinite(utcOffsetSeconds)) return true;
+  const shifted = new Date(Date.now() + utcOffsetSeconds * 1000);
+  const hour = shifted.getUTCHours();
+  return hour >= 6 && hour < 18;
+}
+
+function rgbToCss(rgb) {
+  return `rgb(${Math.round(rgb.r)},${Math.round(rgb.g)},${Math.round(rgb.b)})`;
+}
+
+function lerpRgb(a, b, t) {
+  const u = clamp(t, 0, 1);
+  return {
+    r: a.r + (b.r - a.r) * u,
+    g: a.g + (b.g - a.g) * u,
+    b: a.b + (b.b - a.b) * u
+  };
+}
+
+function mixTowardWhite(rgb, amount) {
+  const w = { r: 255, g: 255, b: 255 };
+  return lerpRgb(rgb, w, amount);
+}
+
+function vec3TupleToRgb(bottomVec) {
+  return {
+    r: bottomVec[0],
+    g: bottomVec[1],
+    b: bottomVec[2]
+  };
+}
+
+function fallbackPresentationGradients(isDay) {
+  const nightA = { r: 15, g: 24, b: 41 };
+  const nightB = { r: 30, g: 58, b: 95 };
+  const dayA = { r: 110, g: 190, b: 245 };
+  const dayB = { r: 200, g: 230, b: 255 };
+  if (isDay) {
+    const skyGradient = `linear-gradient(to bottom, ${rgbToCss(dayA)} 0%, ${rgbToCss(dayB)} 100%)`;
+    const storyGradient = `linear-gradient(135deg, rgba(255,255,255,0.97) 0%, ${rgbToCss(mixTowardWhite(dayB, 0.88))} 100%)`;
+    return { skyGradient, storyGradient };
+  }
+  const skyGradient = `linear-gradient(to bottom, ${rgbToCss(nightA)} 0%, ${rgbToCss(nightB)} 100%)`;
+  const storyGradient =
+    "linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(232,240,252,1) 100%)";
+  return { skyGradient, storyGradient };
+}
+
+function computePresentationSkyState(nowMs, sunriseMs, sunsetMs, utcOffsetSeconds, latitude, longitude) {
+  const invalidTimes =
+    !Number.isFinite(sunriseMs) ||
+    !Number.isFinite(sunsetMs) ||
+    !Number.isFinite(nowMs) ||
+    sunriseMs >= sunsetMs;
+
+  let isDay;
+  if (invalidTimes) {
+    isDay = isDayLocalHeuristic(utcOffsetSeconds);
+    const { skyGradient, storyGradient } = fallbackPresentationGradients(isDay);
+    return { isDay, skyGradient, storyGradient };
+  }
+
+  isDay = nowMs > sunriseMs && nowMs < sunsetMs;
+
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+  const canUseHorizon =
+    typeof globalThis.renderHorizonGradient === "function" &&
+    typeof globalThis.getSolarAltitudeRadians === "function" &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lon);
+
+  if (canUseHorizon) {
+    const alt = globalThis.getSolarAltitudeRadians(new Date(nowMs), lat, lon);
+    if (Number.isFinite(alt)) {
+      const out = globalThis.renderHorizonGradient(alt);
+      const skyGradient = out[0];
+      const bottomRgb = vec3TupleToRgb(out[2]);
+      const storyEnd = mixTowardWhite(bottomRgb, 0.82);
+      const storyGradient = `linear-gradient(135deg, rgba(255,255,255,0.96) 0%, ${rgbToCss(storyEnd)} 100%)`;
+      return { isDay, skyGradient, storyGradient };
+    }
+  }
+
+  const { skyGradient, storyGradient } = fallbackPresentationGradients(isDay);
+  return { isDay, skyGradient, storyGradient };
+}
+
+function applyPresentationSkyThemeFromMeta(forecastMeta) {
+  if (!isPresentationMode || !forecastMeta) return;
+
+  const offset = forecastMeta.utc_offset_seconds;
+  const daily = forecastMeta.daily;
+  const sunriseStr = daily.sunrise != null ? String(daily.sunrise) : "";
+  const sunsetStr = daily.sunset != null ? String(daily.sunset) : "";
+  const sunriseMs = parseOpenMeteoLocalInstant(sunriseStr, offset);
+  const sunsetMs = parseOpenMeteoLocalInstant(sunsetStr, offset);
+  const lat =
+    forecastMeta.latitude != null ? Number(forecastMeta.latitude) : presentationCoords?.latitude;
+  const lon =
+    forecastMeta.longitude != null ? Number(forecastMeta.longitude) : presentationCoords?.longitude;
+  const state = computePresentationSkyState(Date.now(), sunriseMs, sunsetMs, offset, lat, lon);
+
+  document.body.style.setProperty("--pres-sky-gradient", state.skyGradient);
+  document.body.style.setProperty("--pres-story-gradient", state.storyGradient);
+  document.body.classList.toggle("pres-sky--day", state.isDay);
+  document.body.classList.toggle("pres-sky--night", !state.isDay);
+
+  if (presentationSkySun) {
+    presentationSkySun.hidden = !state.isDay;
+  }
+  if (presentationSkyMoon) {
+    presentationSkyMoon.hidden = state.isDay;
+  }
+}
+
+function clearPresentationSkyTheme() {
+  stopPresentationSkyRefresh();
+  document.body.style.removeProperty("--pres-sky-gradient");
+  document.body.style.removeProperty("--pres-story-gradient");
+  document.body.classList.remove("pres-sky--day", "pres-sky--night");
+  if (presentationSkySun) {
+    presentationSkySun.hidden = true;
+  }
+  if (presentationSkyMoon) {
+    presentationSkyMoon.hidden = true;
+  }
+}
+
+function stopPresentationSkyRefresh() {
+  if (presentationSkyIntervalId != null) {
+    clearInterval(presentationSkyIntervalId);
+    presentationSkyIntervalId = null;
+  }
+}
+
+function startPresentationSkyRefresh() {
+  stopPresentationSkyRefresh();
+  if (!isPresentationMode || !lastForecastMeta) return;
+  presentationSkyIntervalId = window.setInterval(() => {
+    if (!isPresentationMode || !lastForecastMeta) {
+      stopPresentationSkyRefresh();
+      return;
+    }
+    applyPresentationSkyThemeFromMeta(lastForecastMeta);
+  }, PRESENTATION_SKY_REFRESH_MS);
 }
 
 function engineerLiveFeatures(daily, wmoBuckets) {
@@ -554,7 +827,7 @@ function euclideanDistance(vecA, vecB) {
   return Math.sqrt(sum);
 }
 
-function getNearestRows(liveVector, historyRows, featureCols, topN) {
+function getNearestRows(liveVector, historyRows, featureCols, topN, dedupeByLocation = true) {
   const scored = [];
 
   for (const row of historyRows) {
@@ -573,6 +846,10 @@ function getNearestRows(liveVector, historyRows, featureCols, topN) {
   }
 
   scored.sort((a, b) => a.distance - b.distance);
+
+  if (!dedupeByLocation) {
+    return scored.slice(0, topN);
+  }
 
   const seenLocation = new Set();
   const uniqueByLocation = [];
