@@ -12,6 +12,15 @@ body {
 }
 
 body.mode-pres {
+  --pres-content-max: 720px;
+  --pres-surface-bg: var(
+    --pres-story-gradient,
+    linear-gradient(135deg, #ffffff 0%, #eef4ff 100%)
+  );
+  --pres-surface-shadow: 0 2px 14px rgba(15, 61, 129, 0.1);
+  --pres-surface-accent-width: 5px;
+  --pres-surface-accent: #1f6feb;
+  --pres-surface-radius: 12px;
   background: var(
     --pres-sky-gradient,
     linear-gradient(to bottom, rgb(126, 200, 240) 0%, rgb(214, 235, 255) 100%)
@@ -173,24 +182,30 @@ pre {
 .presentation-panel {
   flex: 1 1 420px;
   min-width: 320px;
-  max-width: 720px;
+  max-width: var(--pres-content-max, 720px);
   margin: 0;
   padding: 0;
 }
 
-.presentation-story {
+.presentation-story,
+.presentation-similar-region {
   background: var(
-    --pres-story-gradient,
+    --pres-surface-bg,
     linear-gradient(135deg, #ffffff 0%, #eef4ff 100%)
   );
   border: none;
-  border-left: 5px solid #1f6feb;
-  border-radius: 0 12px 12px 0;
+  border-left: var(--pres-surface-accent-width, 5px) solid
+    var(--pres-surface-accent, #1f6feb);
+  border-radius: 0 var(--pres-surface-radius, 12px) var(--pres-surface-radius, 12px) 0;
+  box-shadow: var(--pres-surface-shadow, 0 2px 14px rgba(15, 61, 129, 0.1));
+  box-sizing: border-box;
+}
+
+.presentation-story {
   padding: 1.35rem 1.5rem 1.45rem 1.4rem;
   font-size: 1.35rem;
   line-height: 1.55;
   width: 100%;
-  box-shadow: 0 2px 14px rgba(15, 61, 129, 0.1);
 }
 
 .presentation-narrative {
@@ -222,25 +237,23 @@ pre {
 }
 
 .presentation-results-heading {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   margin: 1.5rem 0 0.65rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: #1c2430;
-  max-width: 75%;
+  max-width: var(--pres-content-max, 720px);
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
 
 .presentation-similar-region {
-  background: linear-gradient(180deg, #f6f8fc 0%, #eef2f8 100%);
-  border: 1px solid #dde4ee;
-  border-radius: 12px;
   padding: 1rem 1rem 1.15rem;
-  box-shadow: 0 4px 14px rgba(20, 40, 80, 0.06);
-  max-width: 75%;
-  margin: 0 auto;
-  box-sizing: border-box;
+  max-width: var(--pres-content-max, 720px);
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .presentation-table-wrap {
@@ -432,6 +445,11 @@ body.mode-pres.pres-sky--night .layout-intro .status {
 body.mode-pres.pres-sky--night .layout-intro .mode-title:hover,
 body.mode-pres.pres-sky--night .layout-intro .mode-title:focus-visible {
   color: #a6d4ff;
+}
+
+body.mode-pres.pres-sky--night .presentation-results-heading {
+  color: #f0f4fa;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 /* Unit toggle (C / F) — nested in presentation-top-right in presentation mode */
