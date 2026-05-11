@@ -2,7 +2,7 @@
   "name": "data-experience-weather-similarity",
   "version": "1.0.0",
   "private": true,
-  "description": "Weather similarity viewer with NYT article search proxy",
+  "description": "Weather similarity viewer for historical archive matching",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

@@ -1,7 +1,5 @@
 const TOP_N_CLASSIC = 20;
-const ARTICLE_LOOKUP_CLASSIC = TOP_N_CLASSIC;
 const TOP_N_PRESENTATION = 7;
-const ARTICLE_LOOKUP_PRESENTATION = TOP_N_PRESENTATION;
 const SCALER_PATH = "./weather-data/normalized/scaler_params.json";
 const NORMALIZED_CSV_PATH = "./weather-data/normalized/combined_weather_normalized.csv";
 const RAW_CSV_PATH = "./weather-data/combined/weather_history.csv";
@@ -38,6 +36,12 @@ let currentUnit = "C";
 let lastForecastMeta = null;
 let lastPresentationRows = null;
 let presentationSkyIntervalId = null;
+let activeArchiveQuery = null;
+
+/** @type {{ cities: string[], datesByCity: Map<string, string[]> } | null} */
+let archivePickerModel = null;
+let archivePickerReady = false;
+let archivePickerListenersBound = false;
 
 const WMO_DESCRIPTIONS = {
   0: "Clear sky",
@@ -87,6 +91,11 @@ const statusEl = document.getElementById("status");
 const resultsBody = document.querySelector("#resultsTable tbody");
 const debugOutput = document.getElementById("debugOutput");
 const todayWeatherCard = document.getElementById("todayWeatherCard");
+const archivePickCity = document.getElementById("archivePickCity");
+const archivePickYear = document.getElementById("archivePickYear");
+const archivePickMonth = document.getElementById("archivePickMonth");
+const archivePickDay = document.getElementById("archivePickDay");
+const archivePickRun = document.getElementById("archivePickRun");
 
 runButton.addEventListener("click", runMatcher);
 searchHistoryButton.addEventListener("click", onPresentationSearchAndReveal);
@@ -115,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     setStatus("Ready.");
   }
+  initArchivePickerUi();
 });
 
 function syncPanels() {
@@ -147,7 +157,13 @@ function setUnit(unit) {
   unitToggleEl.querySelectorAll(".unit-btn").forEach((btn) => {
     btn.classList.toggle("is-active", btn.dataset.unit === unit);
   });
-  if (lastForecastMeta) {
+  if (activeArchiveQuery?.rawRow) {
+    presentationNarrative.innerHTML = buildPresentationNarrativeHtmlFromArchive(
+      activeArchiveQuery.rawRow,
+      activeArchiveQuery.dateIso,
+      activeArchiveQuery.city
+    );
+  } else if (lastForecastMeta) {
     presentationNarrative.innerHTML = buildPresentationNarrativeHtml(
       lastForecastMeta.daily,
       lastForecastMeta
@@ -320,9 +336,37 @@ function buildPresentationNarrativeHtml(daily, forecastMeta) {
   `;
 }
 
+function buildPresentationNarrativeHtmlFromArchive(rawRow, dateIso, cityLabel) {
+  const daily = dailyLikeFromRawRow(rawRow);
+  const intCode = Math.round(asNumber(daily.weather_code));
+  const wmoLabel = WMO_DESCRIPTIONS[intCode] || "mixed conditions";
+  const wmoLower = wmoLabel.charAt(0).toLowerCase() + wmoLabel.slice(1);
+  const skyClass = skyCssClassForDaily(daily);
+  const tClass = tempCssClass(daily.temperature_2m_mean);
+  const tempStr = formatTemp(daily.temperature_2m_mean);
+  const tz = rawRow.timezone ? escapeHtml(String(rawRow.timezone)) : "archive";
+  const lat = Number(rawRow.latitude);
+  const lon = Number(rawRow.longitude);
+  const locLine = isFiniteNumber(lat) && isFiniteNumber(lon)
+    ? `<p class="presentation-loc">(${tz} · ${formatNumber(lat, 2)}°, ${formatNumber(lon, 2)}°)</p>`
+    : `<p class="presentation-loc">(${tz})</p>`;
+  const place = escapeHtml(String(cityLabel || rawRow.city || ""));
+
+  return `
+    <p class="presentation-lede">
+      On <strong>${escapeHtml(formatFullDate(dateIso))}</strong> in <strong>${place}</strong>,
+      it was <span class="${skyClass}">${escapeHtml(wmoLower)}</span>,
+      <span class="${tClass}">${escapeHtml(tempStr)}</span>${escapeHtml(precipPhrase(daily))}.
+      What else happened on a day like this?
+    </p>
+    ${locLine}
+  `;
+}
+
 async function initPresentationWeather() {
   stopPresentationSkyRefresh();
   clearPresentationSkyTheme();
+  activeArchiveQuery = null;
   searchHistoryButton.disabled = true;
   presentationCards.innerHTML = "";
   lastPresentationRows = null;
@@ -351,7 +395,7 @@ async function initPresentationWeather() {
 }
 
 async function onPresentationSearchAndReveal() {
-  if (!presentationCoords) {
+  if (!presentationCoords && !activeArchiveQuery) {
     setStatus("Location is not available yet.");
     return;
   }
@@ -362,18 +406,27 @@ async function onPresentationSearchAndReveal() {
   setStatus("Loading archive, matching, and revealing…");
 
   try {
-    const { latitude, longitude } = presentationCoords;
-    const result = await runSimilarityPipeline({
-      latitude,
-      longitude,
-      topN: TOP_N_PRESENTATION,
-      articleLimit: ARTICLE_LOOKUP_PRESENTATION,
-      dedupeByLocation: true
-    });
-    const rows = result.nearestWithArticles;
+    const result = activeArchiveQuery
+      ? await runSimilarityFromArchiveRow({
+          city: activeArchiveQuery.city,
+          dateIso: activeArchiveQuery.dateIso,
+          topN: TOP_N_PRESENTATION,
+          dedupeByLocation: true,
+          setStatusMessages: false
+        })
+      : await runSimilarityPipeline({
+          latitude: presentationCoords.latitude,
+          longitude: presentationCoords.longitude,
+          topN: TOP_N_PRESENTATION,
+          dedupeByLocation: true
+        });
+    const rows = result.nearest;
     if (!rows.length) {
       setStatus("No similar days found.");
       return;
+    }
+    if (activeArchiveQuery) {
+      renderPresentationArchiveQuery(result, activeArchiveQuery.city, activeArchiveQuery.dateIso, false);
     }
     lastPresentationRows = rows;
     revealPresentationRows(rows);
@@ -421,47 +474,14 @@ function revealPresentationRows(rows) {
 }
 
 function buildPresentationTableRowHtml(row) {
-  const rainSnow = escapeHtml(formatHistoricalRainSnow(row));
-  const nyt = formatPresentationArticleTdInner(row.article);
   const locText = `${escapeHtml(row.city)} · ${formatNumber(row.latitude, 1)}°, ${formatNumber(row.longitude, 1)}°`;
   return `
     <tr>
       <td class="pres-phase1 presentation-reveal-cell">${escapeHtml(formatFullDate(row.date))}</td>
       <td class="pres-phase1 presentation-reveal-cell presentation-cell--loc">${locText}</td>
       <td class="pres-phase2 presentation-reveal-cell"><span class="${tempCssClass(row.temp_mean_c)}">${formatTemp(row.temp_mean_c)}</span></td>
-      <td class="pres-phase2 presentation-reveal-cell">${rainSnow}</td>
-      <td class="pres-phase2 presentation-reveal-cell">${formatNumber(row.cloud_cover_mean_pct)}%</td>
-      <td class="pres-phase2 presentation-reveal-cell">${formatNumber(row.wind_speed_mean_kmh)} km/h</td>
-      <td class="pres-phase2 presentation-reveal-cell presentation-cell--nyt">${nyt}</td>
     </tr>
   `;
-}
-
-function formatPresentationArticleTdInner(article) {
-  if (!article || article.checked !== true) {
-    return '<span class="presentation-nyt-inline presentation-nyt-inline--muted">—</span>';
-  }
-  if (article.found) {
-    const safeTitle = escapeHtml(article.title || "Untitled");
-    const url = article.url ? encodeURI(article.url) : "";
-    if (url) {
-      return `<a class="presentation-nyt-inline presentation-nyt-inline--link" href="${url}" target="_blank" rel="noopener noreferrer">${safeTitle}</a>`;
-    }
-    return `<span class="presentation-nyt-inline">${safeTitle}</span>`;
-  }
-  return '<span class="presentation-nyt-inline presentation-nyt-inline--muted">No headline</span>';
-}
-
-function formatHistoricalRainSnow(row) {
-  const rain = asNumber(row.rain_sum_mm);
-  const snow = asNumber(row.snowfall_sum_cm);
-  if (isFiniteNumber(snow) && snow >= 0.1) {
-    return `Snow: ${formatNumber(row.snowfall_sum_cm)} cm`;
-  }
-  if (isFiniteNumber(rain) && rain >= 0.1) {
-    return `Rain: ${formatNumber(row.rain_sum_mm)} mm`;
-  }
-  return "No significant rain or snow";
 }
 
 async function runMatcher() {
@@ -479,12 +499,11 @@ async function runMatcher() {
       latitude,
       longitude,
       topN: TOP_N_CLASSIC,
-      articleLimit: ARTICLE_LOOKUP_CLASSIC,
       dedupeByLocation: false
     });
 
     renderTodayWeather(result.liveDaily, latitude, longitude);
-    renderResults(result.nearestWithArticles);
+    renderResults(result.nearest);
     renderDebug(
       result.engineered,
       result.liveVector,
@@ -492,9 +511,7 @@ async function runMatcher() {
       latitude,
       longitude
     );
-    setStatus(
-      `Done. Found ${result.nearestWithArticles.length} similar days and checked NYT for top ${Math.min(ARTICLE_LOOKUP_CLASSIC, result.nearestWithArticles.length)}.`
-    );
+    setStatus(`Done. Found ${result.nearest.length} similar days.`);
   } catch (error) {
     todayWeatherCard.textContent = "Unable to load today's weather.";
     setStatus(`Error: ${error.message}`);
@@ -503,7 +520,7 @@ async function runMatcher() {
   }
 }
 
-async function runSimilarityPipeline({ latitude, longitude, topN, articleLimit, dedupeByLocation = true }) {
+async function runSimilarityPipeline({ latitude, longitude, topN, dedupeByLocation = true }) {
   const [scalerConfig, historyRows, rawHistoryRows] = await Promise.all([
     loadScalerConfig(),
     loadHistoryRows(),
@@ -524,18 +541,146 @@ async function runSimilarityPipeline({ latitude, longitude, topN, articleLimit, 
   const nearest = getNearestRows(liveVector, historyRows, scalerConfig.feature_cols, topN, dedupeByLocation);
   const nearestWithRaw = attachRawHistoryFields(nearest);
 
-  setStatus("Looking up NYT articles for matches...");
-  const nearestWithArticles = await attachNytArticles(nearestWithRaw, articleLimit);
-
   return {
     liveDaily,
     forecastMeta,
     engineered,
     liveVector,
-    nearestWithArticles,
+    nearest: nearestWithRaw,
     featureCols: scalerConfig.feature_cols,
     latitude,
     longitude
+  };
+}
+
+function dailyFromRawForEngineering(rawRow) {
+  return {
+    weather_code: rawRow.weather_code,
+    temperature_2m_mean: rawRow.temp_mean_c,
+    apparent_temperature_mean: rawRow.apparent_temp_mean_c,
+    rain_sum: rawRow.rain_sum_mm,
+    snowfall_sum: rawRow.snowfall_sum_cm,
+    precipitation_hours: rawRow.precipitation_hours,
+    daylight_duration: rawRow.daylight_duration_s,
+    sunshine_duration: rawRow.sunshine_duration_s,
+    wind_gusts_10m_max: rawRow.wind_gusts_max_kmh,
+    wind_speed_10m_mean: rawRow.wind_speed_mean_kmh,
+    dew_point_2m_mean: rawRow.dewpoint_mean_c,
+    cloud_cover_mean: rawRow.cloud_cover_mean_pct
+  };
+}
+
+function dailyLikeFromRawRow(rawRow) {
+  return dailyFromRawForEngineering(rawRow);
+}
+
+function getRawRowForNormalizedQuery(queryRow) {
+  const key = makeHistoryKey(queryRow);
+  return rawHistoryIndexCache ? rawHistoryIndexCache.get(key) : null;
+}
+
+function forecastMetaFromRawRow(rawRow, dateIso) {
+  const lat = Number(rawRow.latitude);
+  const lon = Number(rawRow.longitude);
+  const daily = dailyLikeFromRawRow(rawRow);
+  daily.sunrise = `${dateIso}T07:15:00`;
+  daily.sunset = `${dateIso}T18:45:00`;
+  return {
+    daily,
+    timezone: String(rawRow.timezone || ""),
+    latitude: lat,
+    longitude: lon,
+    utc_offset_seconds: 0
+  };
+}
+
+function renderPresentationArchiveQuery(result, city, dateIso, revealRows = true) {
+  activeArchiveQuery = {
+    city,
+    dateIso,
+    rawRow: result.rawRow
+  };
+  presentationCoords = {
+    latitude: Number(result.rawRow.latitude),
+    longitude: Number(result.rawRow.longitude)
+  };
+  lastForecastMeta = forecastMetaFromRawRow(result.rawRow, dateIso);
+  presentationNarrative.innerHTML = buildPresentationNarrativeHtmlFromArchive(
+    result.rawRow,
+    dateIso,
+    city
+  );
+  applyPresentationSkyThemeFromMeta(lastForecastMeta);
+  startPresentationSkyRefresh();
+  lastPresentationRows = result.nearest;
+  presentationCards.innerHTML = "";
+  if (revealRows && result.nearest.length) {
+    revealPresentationRows(result.nearest);
+  }
+}
+
+async function runSimilarityFromArchiveRow({
+  city,
+  dateIso,
+  topN,
+  dedupeByLocation,
+  setStatusMessages = true
+}) {
+  if (setStatusMessages) {
+    setStatus("Loading scaler and archive data...");
+  }
+  const [scalerConfig, historyRows] = await Promise.all([loadScalerConfig(), loadHistoryRows()]);
+  await loadRawHistoryRows();
+
+  validateScalerConfig(scalerConfig);
+  validateHistorySchema(historyRows, scalerConfig.feature_cols);
+  validateRawHistorySchema(rawHistoryRowsCache);
+
+  const cityNorm = String(city || "").trim();
+  const dateNorm = String(dateIso || "").trim();
+  const queryRow = historyRows.find(
+    (r) => String(r.city || "").trim() === cityNorm && String(r.date || "").trim() === dateNorm
+  );
+  if (!queryRow) {
+    throw new Error(`No dataset row for "${cityNorm}" on ${dateNorm}.`);
+  }
+
+  const featureCols = scalerConfig.feature_cols;
+  const liveVector = featureCols.map((col) => {
+    const v = Number(queryRow[col]);
+    if (!isFiniteNumber(v)) {
+      throw new Error(`Archive row has invalid feature "${col}".`);
+    }
+    return v;
+  });
+
+  const rawRow = getRawRowForNormalizedQuery(queryRow);
+  if (!rawRow) {
+    throw new Error("Raw weather row missing for this archive entry (date / city mismatch in CSVs).");
+  }
+  const engineered = engineerLiveFeatures(dailyFromRawForEngineering(rawRow), scalerConfig.wmoBuckets);
+
+  if (setStatusMessages) {
+    setStatus("Calculating nearest historical days...");
+  }
+  const excludeKey = makeHistoryKey(queryRow);
+  const nearest = getNearestRows(
+    liveVector,
+    historyRows,
+    featureCols,
+    topN,
+    dedupeByLocation,
+    excludeKey
+  );
+  const nearestWithRaw = attachRawHistoryFields(nearest);
+
+  return {
+    queryRow,
+    rawRow,
+    engineered,
+    liveVector,
+    nearest: nearestWithRaw,
+    featureCols
   };
 }
 
@@ -827,10 +972,20 @@ function euclideanDistance(vecA, vecB) {
   return Math.sqrt(sum);
 }
 
-function getNearestRows(liveVector, historyRows, featureCols, topN, dedupeByLocation = true) {
+function getNearestRows(
+  liveVector,
+  historyRows,
+  featureCols,
+  topN,
+  dedupeByLocation = true,
+  excludeHistoryKey = null
+) {
   const scored = [];
 
   for (const row of historyRows) {
+    if (excludeHistoryKey && makeHistoryKey(row) === excludeHistoryKey) {
+      continue;
+    }
     const histVector = featureCols.map((col) => Number(row[col]));
     if (!histVector.every(isFiniteNumber)) {
       continue;
@@ -931,24 +1086,10 @@ function renderResults(rows) {
       <td>${formatNumber(row.wind_gusts_max_kmh)}</td>
       <td>${formatNumber(row.cloud_cover_mean_pct)}</td>
       <td>${row.distance.toFixed(4)}</td>
-      <td>${formatArticleCell(row.article)}</td>
     </tr>`
   )).join("");
 
   resultsBody.innerHTML = html;
-}
-
-function formatArticleCell(article) {
-  if (!article || article.checked !== true) {
-    return "Not checked";
-  }
-  if (article.found) {
-    const safeTitle = escapeHtml(article.title || "Untitled");
-    return article.url
-      ? `<a href="${encodeURI(article.url)}" target="_blank" rel="noopener noreferrer">${safeTitle}</a>`
-      : safeTitle;
-  }
-  return "No article found for this day";
 }
 
 function escapeHtml(value) {
@@ -958,40 +1099,6 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll("\"", "&quot;")
     .replaceAll("'", "&#39;");
-}
-
-async function attachNytArticles(rows, limit) {
-  const capped = Math.max(0, Math.min(rows.length, limit));
-  if (capped === 0) {
-    return rows.map((row) => ({ ...row, article: { checked: false } }));
-  }
-
-  const lookups = rows.slice(0, capped).map((row) => fetchNytArticleForRow(row));
-  const results = await Promise.all(lookups);
-
-  return rows.map((row, index) => {
-    if (index >= capped) {
-      return { ...row, article: { checked: false } };
-    }
-    return { ...row, article: { checked: true, ...results[index] } };
-  });
-}
-
-async function fetchNytArticleForRow(row) {
-  const params = new URLSearchParams({ date: row.date, city: row.city });
-  const response = await fetch(`/api/nyt-article?${params.toString()}`);
-  if (!response.ok) {
-    return { found: false };
-  }
-  const payload = await response.json();
-  if (!payload || payload.found !== true) {
-    return { found: false };
-  }
-  return {
-    found: true,
-    title: payload.title || "Untitled",
-    url: payload.url || ""
-  };
 }
 
 function renderDebug(engineered, vector, featureCols, lat, lon) {
@@ -1200,5 +1307,200 @@ function validateRawHistorySchema(rows) {
   const missing = required.filter((col) => !(col in sample));
   if (missing.length) {
     throw new Error(`Raw CSV missing required columns: ${missing.join(", ")}`);
+  }
+}
+
+const ARCHIVE_MONTH_LABELS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
+
+function archiveMonthLabel(mm) {
+  const n = Number(mm);
+  return ARCHIVE_MONTH_LABELS[n - 1] || String(mm);
+}
+
+function buildArchivePickerModel(historyRows) {
+  const dateSetByCity = new Map();
+  for (const row of historyRows) {
+    const c = String(row.city || "").trim();
+    const d = String(row.date || "").trim();
+    if (!c || !/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      continue;
+    }
+    if (!dateSetByCity.has(c)) {
+      dateSetByCity.set(c, new Set());
+    }
+    dateSetByCity.get(c).add(d);
+  }
+  const cities = Array.from(dateSetByCity.keys()).sort((a, b) => a.localeCompare(b));
+  const datesByCity = new Map();
+  for (const city of cities) {
+    datesByCity.set(city, Array.from(dateSetByCity.get(city)).sort());
+  }
+  return { cities, datesByCity };
+}
+
+function fillSelectOptions(select, values, labelFn = null) {
+  select.innerHTML = "";
+  for (const v of values) {
+    const opt = document.createElement("option");
+    opt.value = v;
+    opt.textContent = labelFn ? labelFn(v) : String(v);
+    select.appendChild(opt);
+  }
+}
+
+function archivePickerRefreshFromCity() {
+  if (!archivePickerModel) {
+    return;
+  }
+  const city = archivePickCity.value;
+  const dates = archivePickerModel.datesByCity.get(city) || [];
+  const years = [...new Set(dates.map((d) => d.slice(0, 4)))].sort((a, b) => b.localeCompare(a));
+  fillSelectOptions(archivePickYear, years);
+  archivePickYear.value = years[0] || "";
+  archivePickerRefreshFromYear();
+}
+
+function archivePickerRefreshFromYear() {
+  if (!archivePickerModel) {
+    return;
+  }
+  const city = archivePickCity.value;
+  const dates = archivePickerModel.datesByCity.get(city) || [];
+  const y = archivePickYear.value;
+  const prevM = archivePickMonth.value;
+  const months = [...new Set(dates.filter((d) => d.startsWith(`${y}-`)).map((d) => d.slice(5, 7)))].sort(
+    (a, b) => Number(a) - Number(b)
+  );
+  fillSelectOptions(archivePickMonth, months, archiveMonthLabel);
+  archivePickMonth.value = months.includes(prevM) ? prevM : months[0] || "";
+  archivePickerRefreshFromMonth();
+}
+
+function archivePickerRefreshFromMonth() {
+  if (!archivePickerModel) {
+    return;
+  }
+  const city = archivePickCity.value;
+  const dates = archivePickerModel.datesByCity.get(city) || [];
+  const y = archivePickYear.value;
+  const m = archivePickMonth.value;
+  const prevD = archivePickDay.value;
+  const prefix = `${y}-${m}-`;
+  const days = [...new Set(dates.filter((d) => d.startsWith(prefix)).map((d) => d.slice(8, 10)))].sort(
+    (a, b) => Number(a) - Number(b)
+  );
+  fillSelectOptions(archivePickDay, days, (dd) => String(Number(dd)));
+  archivePickDay.value = days.includes(prevD) ? prevD : days[0] || "";
+}
+
+function archivePickerSetEnabled(enabled) {
+  [archivePickCity, archivePickYear, archivePickMonth, archivePickDay, archivePickRun].forEach((el) => {
+    if (el) {
+      el.disabled = !enabled;
+    }
+  });
+}
+
+async function initArchivePickerUi() {
+  if (!archivePickCity || !archivePickYear || !archivePickMonth || !archivePickDay || !archivePickRun) {
+    return;
+  }
+  archivePickerSetEnabled(false);
+  archivePickRun.textContent = "Loading archive…";
+  try {
+    const rows = await loadHistoryRows();
+    archivePickerModel = buildArchivePickerModel(rows);
+    if (!archivePickerModel.cities.length) {
+      archivePickRun.textContent = "No locations";
+      return;
+    }
+    fillSelectOptions(archivePickCity, archivePickerModel.cities);
+    archivePickerRefreshFromCity();
+    archivePickerReady = true;
+    archivePickRun.textContent = "Find similar days";
+    archivePickerSetEnabled(true);
+
+    if (!archivePickerListenersBound) {
+      archivePickerListenersBound = true;
+      archivePickCity.addEventListener("change", archivePickerRefreshFromCity);
+      archivePickYear.addEventListener("change", archivePickerRefreshFromYear);
+      archivePickMonth.addEventListener("change", archivePickerRefreshFromMonth);
+      archivePickRun.addEventListener("click", onArchivePickerSubmit);
+    }
+  } catch (err) {
+    archivePickRun.textContent = "Archive failed to load";
+    console.error(err);
+  }
+}
+
+async function onArchivePickerSubmit() {
+  if (!archivePickerReady || !archivePickerModel) {
+    return;
+  }
+  const city = archivePickCity.value;
+  const y = archivePickYear.value;
+  const m = archivePickMonth.value;
+  const d = String(archivePickDay.value || "").padStart(2, "0");
+  const dateIso = `${y}-${m}-${d}`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateIso)) {
+    if (!isPresentationMode) {
+      setStatus("Pick a valid date.");
+    }
+    return;
+  }
+
+  archivePickRun.disabled = true;
+  try {
+    if (isPresentationMode) {
+      const result = await runSimilarityFromArchiveRow({
+        city,
+        dateIso,
+        topN: TOP_N_PRESENTATION,
+        dedupeByLocation: true,
+        setStatusMessages: false
+      });
+      renderPresentationArchiveQuery(result, city, dateIso, true);
+    } else {
+      const result = await runSimilarityFromArchiveRow({
+        city,
+        dateIso,
+        topN: TOP_N_CLASSIC,
+        dedupeByLocation: false,
+        setStatusMessages: true
+      });
+      const daily = dailyLikeFromRawRow(result.rawRow);
+      daily.time = dateIso;
+      renderTodayWeather(daily, Number(result.queryRow.latitude), Number(result.queryRow.longitude));
+      renderResults(result.nearest);
+      renderDebug(
+        result.engineered,
+        result.liveVector,
+        result.featureCols,
+        Number(result.queryRow.latitude),
+        Number(result.queryRow.longitude)
+      );
+      setStatus(`Similar days for ${city} on ${dateIso}.`);
+    }
+  } catch (error) {
+    if (isPresentationMode) {
+      presentationNarrative.innerHTML = `<p class="presentation-error">${escapeHtml(error.message)}</p>`;
+    } else {
+      setStatus(`Error: ${error.message}`);
+    }
+  } finally {
+    archivePickRun.disabled = false;
   }
 }

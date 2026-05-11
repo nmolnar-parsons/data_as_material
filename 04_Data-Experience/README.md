@@ -1,4 +1,4 @@
-# Weather Similarity + NYT Lookup
+# Weather Similarity
 
 ## Credits
 
@@ -6,11 +6,12 @@ The presentation-mode **sky background** (CSS multi-stop gradient) is adapted fr
 
 ## Run locally
 
-1. Copy `.env.example` to `.env` and set `NYT_API_KEY`.
-2. Install dependencies:
+1. Install dependencies:
    - `npm install`
-3. Start the local server:
+2. Start the local server:
    - `npm start`
-4. Open `http://localhost:3000`.
+3. Open `http://localhost:3000`.
 
-The app finds the 5 nearest weather days, and queries NYT Article Search for each one.
+Optional: copy `.env.example` to `.env` and set `PORT` if you need a port other than 3000.
+
+The app finds the nearest historical weather days in the archive compared to your current conditions (Open-Meteo).

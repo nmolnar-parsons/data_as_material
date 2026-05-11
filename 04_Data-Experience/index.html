@@ -33,7 +33,7 @@
         <p id="status" class="status" role="status" aria-live="polite">Ready.</p>
 
         <div id="classicPanel" class="classic-panel" hidden>
-          <p class="subtitle">Find the 20 closest historical weather days to your current weather and fetch NYT articles for those days.</p>
+          <p class="subtitle">Find the 20 closest historical weather days to your current weather in the archive.</p>
 
           <section class="controls">
             <button id="runButton" type="button">Find 20 Similar Weather Days</button>
@@ -65,7 +65,6 @@
                     <th>Gust (km/h)</th>
                     <th>Cloud (%)</th>
                     <th>Distance</th>
-                    <th>NYT Article</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -91,7 +90,7 @@
     </div>
 
     <section id="presentationSimilar" class="presentation-similar-section" aria-live="polite">
-      <h2 class="presentation-results-heading">Similar days</h2>
+      <h2 class="presentation-results-heading">Similar Days</h2>
       <div class="presentation-similar-region">
         <div class="presentation-table-wrap">
           <table class="presentation-matches" aria-label="Historical days with similar weather">
@@ -100,10 +99,6 @@
                 <th scope="col">Date</th>
                 <th scope="col">Location</th>
                 <th scope="col">Temp</th>
-                <th scope="col">Rain / snow</th>
-                <th scope="col">Cloud</th>
-                <th scope="col">Wind</th>
-                <th scope="col">NYTimes headline</th>
               </tr>
             </thead>
             <tbody id="presentationCards"></tbody>
@@ -112,6 +107,29 @@
       </div>
     </section>
   </main>
+
+  <aside id="archiveExplorerBar" class="archive-explorer-bar" aria-label="Pick a location and date from the archive">
+    <div class="archive-explorer-inner">
+      <span class="archive-explorer-title">Archive</span>
+      <label class="archive-field">
+        <span class="archive-field-label">Location</span>
+        <select id="archivePickCity" aria-label="Location"></select>
+      </label>
+      <label class="archive-field">
+        <span class="archive-field-label">Year</span>
+        <select id="archivePickYear" aria-label="Year"></select>
+      </label>
+      <label class="archive-field">
+        <span class="archive-field-label">Month</span>
+        <select id="archivePickMonth" aria-label="Month"></select>
+      </label>
+      <label class="archive-field">
+        <span class="archive-field-label">Day</span>
+        <select id="archivePickDay" aria-label="Day"></select>
+      </label>
+      <button type="button" id="archivePickRun" class="archive-explorer-run" disabled>Loading archive…</button>
+    </div>
+  </aside>
 
   <footer class="site-attribution">
     Sky gradient adapted from
