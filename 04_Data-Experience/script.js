@@ -1,7 +1,7 @@
 const TOP_N_CLASSIC = 30;
 const TOP_N_PRESENTATION = 20;
 const SCALER_PATH = "./weather-data/normalized/scaler_params.json";
-const NORMALIZED_JSON_PATH = "./weather-data/normalized/combined_weather_normalized.json";
+const NORMALIZED_CSV_PATH = "./weather-data/normalized/combined_weather_normalized.csv";
 const RAW_CSV_PATH = "./weather-data/combined/weather_history.csv";
 const WORLD_ATLAS_PATH = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json";
 const OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
@@ -2095,18 +2095,15 @@ async function loadHistoryRows() {
     return historyRowsCache;
   }
   if (!historyRowsPromise) {
-    historyRowsPromise = fetch(NORMALIZED_JSON_PATH)
+    historyRowsPromise = fetch(NORMALIZED_CSV_PATH)
       .then((response) => {
         if (!response.ok) {
-          throw new Error(`Could not load normalized JSON at ${NORMALIZED_JSON_PATH}.`);
+          throw new Error(`Could not load normalized CSV at ${NORMALIZED_CSV_PATH}.`);
         }
-        return response.json();
+        return response.text();
       })
-      .then((rows) => {
-        if (!Array.isArray(rows)) {
-          throw new Error("Normalized JSON must be an array of weather rows.");
-        }
-        historyRowsCache = rows;
+      .then((csvText) => {
+        historyRowsCache = parseCsv(csvText);
         return historyRowsCache;
       })
       .catch((error) => {
