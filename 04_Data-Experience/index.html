@@ -4,39 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A Day Like This</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Karla:ital,wght@0,200..800;1,200..800&family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&family=Noto+Serif+JP:wght@200..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body class="mode-pres">
-  <div id="presentationTopRight" class="presentation-top-right">
-    <div id="presentationSkyDecor" class="presentation-sky-decor" aria-hidden="true">
-      <svg id="presentationSkySun" class="presentation-sky-icon presentation-sky-icon--sun" width="36" height="36" viewBox="0 0 36 36" hidden>
-        <circle cx="18" cy="18" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/>
-        <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M18 5v3M18 28v3M5 18h3M28 18h3M9 9l2.2 2.2M24.8 24.8l2.2 2.2M27 9l-2.2 2.2M9 27l-2.2 2.2"/>
-      </svg>
-      <svg id="presentationSkyMoon" class="presentation-sky-icon presentation-sky-icon--moon" width="36" height="36" viewBox="0 0 36 36" hidden>
-        <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M24.2 7.5a11 11 0 1 1-10 18.8 6.8 6.8 0 0 0 4.5-6.4 6.8 6.8 0 0 0-4.5-6.4z"/>
-      </svg>
-    </div>
-    <div class="unit-toggle" id="unitToggle" role="group" aria-label="Temperature units">
-      <button type="button" data-unit="C" class="unit-btn is-active">°C</button>
-      <button type="button" data-unit="F" class="unit-btn">°F</button>
-    </div>
-  </div>
-
   <main class="layout-main">
     <div class="layout-top">
       <div class="container layout-intro">
         <h1 id="modeTitle" class="mode-title" role="button" tabindex="0" aria-pressed="true">
-          A Day Like This<span id="modeSuffix" class="mode-suffix"> - presentation mode</span>
+          <span id="modeTitleText">Days of Weather</span><span id="modeSuffix" class="mode-suffix"> - presentation mode</span>
         </h1>
 
         <p id="status" class="status" role="status" aria-live="polite">Ready.</p>
 
         <div id="classicPanel" class="classic-panel" hidden>
-          <p class="subtitle">Find the 20 closest historical weather days to your current weather in the archive.</p>
+          <p class="subtitle">Find the 30 closest historical weather days to your current weather in the archive.</p>
 
           <section class="controls">
-            <button id="runButton" type="button">Find 20 Similar Weather Days</button>
+            <button id="runButton" type="button">Find 30 Similar Weather Days</button>
           </section>
 
           <section class="today-weather">
@@ -83,61 +70,64 @@
         <div id="presentationStory" class="presentation-story" role="region" aria-label="Today's weather prompt">
           <div id="presentationNarrative" class="presentation-narrative">Loading…</div>
           <div class="presentation-actions">
-            <button id="searchHistoryButton" type="button" disabled>Search through history</button>
+            <button id="searchHistoryButton" type="button" disabled>Loading weather...</button>
+            <span id="searchHistoryLoader" class="search-history-loader" aria-label="Loading similar days" hidden></span>
+            <div class="unit-toggle" id="unitToggle" role="group" aria-label="Temperature units">
+              <button type="button" data-unit="C" class="unit-btn">°C</button>
+              <button type="button" data-unit="F" class="unit-btn is-active">°F</button>
+            </div>
           </div>
         </div>
       </section>
     </div>
 
-    <section id="presentationSimilar" class="presentation-similar-section" aria-live="polite">
-      <h2 class="presentation-results-heading">Similar Days</h2>
+    <section id="presentationSimilar" class="presentation-similar-section" aria-live="polite" hidden>
+      <h2 class="presentation-results-heading">A Day Like This</h2>
       <div class="presentation-similar-region">
         <div class="presentation-table-wrap">
           <table class="presentation-matches" aria-label="Historical days with similar weather">
-            <thead>
-              <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Location</th>
-                <th scope="col">Temp</th>
-              </tr>
-            </thead>
             <tbody id="presentationCards"></tbody>
           </table>
         </div>
       </div>
     </section>
+
+    <aside id="archiveExplorerBar" class="archive-explorer-bar" aria-label="Pick a location and date from the archive">
+      <span class="archive-explorer-title">Archive</span>
+      <div class="archive-explorer-inner">
+        <label class="archive-field">
+          <span class="archive-field-label">Location</span>
+          <select id="archivePickCity" aria-label="Location"></select>
+        </label>
+        <label class="archive-field">
+          <span class="archive-field-label">Year</span>
+          <select id="archivePickYear" aria-label="Year"></select>
+        </label>
+        <label class="archive-field">
+          <span class="archive-field-label">Month</span>
+          <select id="archivePickMonth" aria-label="Month"></select>
+        </label>
+        <label class="archive-field">
+          <span class="archive-field-label">Day</span>
+          <select id="archivePickDay" aria-label="Day"></select>
+        </label>
+        <button type="button" id="archivePickRun" class="archive-explorer-run" disabled>Loading archive…</button>
+      </div>
+    </aside>
+
+    <section id="presentationMapPanel" class="presentation-map-panel" aria-label="Map of similar weather days">
+      <div class="presentation-map-card">
+        <div id="weatherMap" class="weather-map" role="img" aria-label="Map showing the current weather location and similar historical weather days">
+          <p class="weather-map-status">Loading map…</p>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <aside id="archiveExplorerBar" class="archive-explorer-bar" aria-label="Pick a location and date from the archive">
-    <div class="archive-explorer-inner">
-      <span class="archive-explorer-title">Archive</span>
-      <label class="archive-field">
-        <span class="archive-field-label">Location</span>
-        <select id="archivePickCity" aria-label="Location"></select>
-      </label>
-      <label class="archive-field">
-        <span class="archive-field-label">Year</span>
-        <select id="archivePickYear" aria-label="Year"></select>
-      </label>
-      <label class="archive-field">
-        <span class="archive-field-label">Month</span>
-        <select id="archivePickMonth" aria-label="Month"></select>
-      </label>
-      <label class="archive-field">
-        <span class="archive-field-label">Day</span>
-        <select id="archivePickDay" aria-label="Day"></select>
-      </label>
-      <button type="button" id="archivePickRun" class="archive-explorer-run" disabled>Loading archive…</button>
-    </div>
-  </aside>
-
-  <footer class="site-attribution">
-    Sky gradient adapted from
-    <a href="https://github.com/dnlzro/horizon" target="_blank" rel="noopener noreferrer">Horizon</a>
-    by <a href="https://github.com/dnlzro" target="_blank" rel="noopener noreferrer">Daniel Lazaro</a>.
-  </footer>
-
   <script src="./horizon-sky.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-geo-projection@4/dist/d3-geo-projection.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
   <script src="./script.js"></script>
 </body>
 </html>

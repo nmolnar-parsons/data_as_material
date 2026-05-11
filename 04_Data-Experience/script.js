@@ -1,12 +1,28 @@
-const TOP_N_CLASSIC = 20;
-const TOP_N_PRESENTATION = 7;
+const TOP_N_CLASSIC = 30;
+const TOP_N_PRESENTATION = 20;
 const SCALER_PATH = "./weather-data/normalized/scaler_params.json";
-const NORMALIZED_CSV_PATH = "./weather-data/normalized/combined_weather_normalized.csv";
+const NORMALIZED_JSON_PATH = "./weather-data/normalized/combined_weather_normalized.json";
 const RAW_CSV_PATH = "./weather-data/combined/weather_history.csv";
+const WORLD_ATLAS_PATH = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json";
 const OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
 const PRESENTATION_ROW_CYCLE_MS = 900;
 const PRESENTATION_HEADER_TO_BODY_MS = 400;
 const PRESENTATION_SKY_REFRESH_MS = 15 * 60 * 1000;
+const WEATHER_MAP_ARC_DURATION_MS = 950;
+const WEATHER_MAP_TIMELINE_START_ISO = "2000-01-01";
+const WEATHER_MAP_TIMELINE_BOTTOM_OFFSET = 16;
+const WEATHER_MAP_TIMELINE_MAP_PADDING = 106;
+const PRESENTATION_FORCE_DARK_THEME = true;
+const PRESENTATION_DATASET_DAY_COUNT = 9261;
+const SEARCH_HISTORY_READY_TEXT = "Search through history";
+const SEARCH_HISTORY_LOADING_WEATHER_TEXT = "Loading weather...";
+const WEATHER_MAP_FOCUS_GEOMETRY = {
+  type: "MultiPoint",
+  coordinates: [
+    [-168, 71.5],
+    [-79.5, 8.5]
+  ]
+};
 
 const DAILY_FIELDS = [
   "weather_code",
@@ -29,14 +45,37 @@ let scalerConfigCache = null;
 let historyRowsCache = null;
 let rawHistoryRowsCache = null;
 let rawHistoryIndexCache = null;
+let scalerConfigPromise = null;
+let historyRowsPromise = null;
+let rawHistoryRowsPromise = null;
 
 let presentationCoords = null;
 let isPresentationMode = true;
-let currentUnit = "C";
+let currentUnit = "F";
 let lastForecastMeta = null;
 let lastPresentationRows = null;
 let presentationSkyIntervalId = null;
 let activeArchiveQuery = null;
+let presentationMapBoundsRaf = null;
+let archivePickerInitStarted = false;
+let presentationSearchInProgress = false;
+let presentationSimilarVisible = false;
+
+const weatherMapState = {
+  loadingPromise: null,
+  world: null,
+  svg: null,
+  root: null,
+  layers: null,
+  zoom: null,
+  currentTransform: null,
+  pendingReset: false,
+  resizeObserver: null,
+  resizeRaf: null,
+  currentPoint: null,
+  matchPoints: [],
+  highlightedPointId: null
+};
 
 /** @type {{ cities: string[], datesByCity: Map<string, string[]> } | null} */
 let archivePickerModel = null;
@@ -75,16 +114,18 @@ const WMO_DESCRIPTIONS = {
 };
 
 const modeTitle = document.getElementById("modeTitle");
+const modeTitleText = document.getElementById("modeTitleText");
 const modeSuffix = document.getElementById("modeSuffix");
 const presentationPanel = document.getElementById("presentationPanel");
+const presentationStory = document.getElementById("presentationStory");
 const presentationSimilar = document.getElementById("presentationSimilar");
 const classicPanel = document.getElementById("classicPanel");
 const presentationNarrative = document.getElementById("presentationNarrative");
 const searchHistoryButton = document.getElementById("searchHistoryButton");
+const searchHistoryLoader = document.getElementById("searchHistoryLoader");
 const presentationCards = document.getElementById("presentationCards");
+const weatherMap = document.getElementById("weatherMap");
 const unitToggleEl = document.getElementById("unitToggle");
-const presentationSkySun = document.getElementById("presentationSkySun");
-const presentationSkyMoon = document.getElementById("presentationSkyMoon");
 
 const runButton = document.getElementById("runButton");
 const statusEl = document.getElementById("status");
@@ -96,6 +137,7 @@ const archivePickYear = document.getElementById("archivePickYear");
 const archivePickMonth = document.getElementById("archivePickMonth");
 const archivePickDay = document.getElementById("archivePickDay");
 const archivePickRun = document.getElementById("archivePickRun");
+const archiveExplorerBar = document.getElementById("archiveExplorerBar");
 
 runButton.addEventListener("click", runMatcher);
 searchHistoryButton.addEventListener("click", onPresentationSearchAndReveal);
@@ -117,29 +159,110 @@ unitToggleEl.addEventListener("click", (event) => {
   setUnit(unit);
 });
 
+presentationCards.addEventListener("pointerover", onPresentationRowHighlightIn);
+presentationCards.addEventListener("pointerout", onPresentationRowHighlightOut);
+presentationCards.addEventListener("focusin", onPresentationRowHighlightIn);
+presentationCards.addEventListener("focusout", onPresentationRowHighlightOut);
+
 document.addEventListener("DOMContentLoaded", () => {
+  setDatasetTitleCount(PRESENTATION_DATASET_DAY_COUNT);
   syncPanels();
+  initWeatherMap();
+  queuePresentationMapBoundsSync();
   if (isPresentationMode) {
     initPresentationWeather();
   } else {
     setStatus("Ready.");
+    scheduleArchivePickerUiInit(false);
   }
-  initArchivePickerUi();
 });
+
+window.addEventListener("resize", queuePresentationMapBoundsSync);
 
 function syncPanels() {
   document.body.classList.toggle("mode-pres", isPresentationMode);
   document.body.classList.toggle("mode-data", !isPresentationMode);
   presentationPanel.hidden = !isPresentationMode;
-  if (presentationSimilar) {
-    presentationSimilar.hidden = !isPresentationMode;
+  syncPresentationSimilarVisibility();
+  const presentationMapPanel = document.getElementById("presentationMapPanel");
+  if (presentationMapPanel) {
+    presentationMapPanel.hidden = !isPresentationMode;
   }
   classicPanel.hidden = isPresentationMode;
-  modeSuffix.textContent = isPresentationMode ? " - presentation mode" : " - data mode";
+  modeSuffix.textContent = isPresentationMode ? "" : " - data mode";
   modeTitle.setAttribute("aria-pressed", String(isPresentationMode));
+  if (isPresentationMode) {
+    initWeatherMap();
+    queuePresentationMapBoundsSync();
+    requestWeatherMapRender();
+  }
   if (!isPresentationMode) {
     clearPresentationSkyTheme();
   }
+}
+
+function syncPresentationSimilarVisibility() {
+  if (presentationSimilar) {
+    const shouldShow = isPresentationMode && presentationSimilarVisible;
+    if (shouldShow) {
+      presentationSimilar.hidden = false;
+      window.requestAnimationFrame(() => {
+        if (isPresentationMode && presentationSimilarVisible) {
+          presentationSimilar.classList.add("is-visible");
+        }
+      });
+    } else {
+      presentationSimilar.classList.remove("is-visible");
+      presentationSimilar.hidden = true;
+    }
+  }
+}
+
+function setPresentationSimilarVisible(isVisible) {
+  presentationSimilarVisible = Boolean(isVisible);
+  syncPresentationSimilarVisibility();
+}
+
+function setSearchHistoryLoading(isLoading) {
+  if (searchHistoryLoader) {
+    searchHistoryLoader.hidden = !isLoading;
+  }
+}
+
+function setSearchHistoryWeatherReady(isReady) {
+  searchHistoryButton.disabled = !isReady;
+  searchHistoryButton.textContent = isReady
+    ? SEARCH_HISTORY_READY_TEXT
+    : SEARCH_HISTORY_LOADING_WEATHER_TEXT;
+}
+
+function setDatasetTitleCount(count) {
+  if (modeTitleText) {
+    modeTitleText.textContent = `${count.toLocaleString()} Days of Weather`;
+  }
+}
+
+function queuePresentationMapBoundsSync() {
+  window.cancelAnimationFrame(presentationMapBoundsRaf);
+  presentationMapBoundsRaf = window.requestAnimationFrame(syncPresentationMapBounds);
+}
+
+function syncPresentationMapBounds() {
+  if (!presentationStory) {
+    return;
+  }
+  if (!isPresentationMode) {
+    document.documentElement.style.removeProperty("--pres-map-top");
+    document.documentElement.style.removeProperty("--pres-map-bottom");
+    return;
+  }
+
+  const storyRect = presentationStory.getBoundingClientRect();
+  const top = Math.max(0, Math.round(storyRect.top));
+  const bottom = 32;
+
+  document.documentElement.style.setProperty("--pres-map-top", `${top}px`);
+  document.documentElement.style.setProperty("--pres-map-bottom", `${bottom}px`);
 }
 
 function toggleMode() {
@@ -172,11 +295,12 @@ function setUnit(unit) {
   if (Array.isArray(lastPresentationRows) && lastPresentationRows.length) {
     rerenderPresentationRowsKeepVisibility(lastPresentationRows);
   }
+  refreshWeatherMapFromState();
 }
 
 function rerenderPresentationRowsKeepVisibility(rows) {
   presentationCards.innerHTML = rows
-    .map((row) => buildPresentationTableRowHtml(row))
+    .map((row, index) => buildPresentationTableRowHtml(row, index))
     .join("");
   presentationCards
     .querySelectorAll(".presentation-reveal-cell")
@@ -236,6 +360,33 @@ function formatFullDate(dateStr) {
   });
 }
 
+function localIsoDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseIsoDateOnly(dateIso) {
+  const match = String(dateIso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return null;
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+  return date;
+}
+
 function formatWeatherCode(code) {
   const intCode = Math.round(asNumber(code));
   const label = WMO_DESCRIPTIONS[intCode] || "Unknown weather";
@@ -273,6 +424,743 @@ function tempCssClass(celsius) {
   return "temp-mild";
 }
 
+function temperatureColor(celsius) {
+  const c = clamp(asNumber(celsius, 12), -20, 40);
+  const sixtyFInCelsius = (60 - 32) * 5 / 9;
+  return d3.scaleDiverging([-20, sixtyFInCelsius, 40], (t) => d3.interpolateRdYlBu(1 - t))(c);
+}
+
+function temperatureRadius(celsius, kind) {
+  const t = (clamp(asNumber(celsius, 12), -20, 40) + 20) / 60;
+  const radius = 6.2 + t * 10.8;
+  return kind === "current" ? radius + 2.4 : radius;
+}
+
+function cloudBlur(cloudCover) {
+  const cloud = clamp(asNumber(cloudCover, 0), 0, 100);
+  return (cloud / 100) * 2.6;
+}
+
+function weatherPointFilter(point) {
+  const blur = cloudBlur(point.cloudCover);
+  const blurPart = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "";
+  const shadowPart = point.kind === "current"
+    ? "drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3))"
+    : "";
+  return [blurPart, shadowPart].filter(Boolean).join(" ") || null;
+}
+
+function initWeatherMap() {
+  if (!weatherMap) {
+    return Promise.resolve(null);
+  }
+  if (weatherMapState.loadingPromise) {
+    return weatherMapState.loadingPromise;
+  }
+  if (
+    !window.d3 ||
+    !window.topojson ||
+    typeof d3.geoModifiedStereographicGs50 !== "function"
+  ) {
+    weatherMap.innerHTML = '<p class="weather-map-status">Map libraries failed to load.</p>';
+    return Promise.resolve(null);
+  }
+
+  weatherMap.innerHTML = "";
+  const svg = d3.select(weatherMap).append("svg").attr("aria-hidden", "true");
+  const root = svg.append("g").attr("class", "weather-map-viewport");
+  const layers = {
+    base: root.append("g").attr("class", "weather-map-base-layer"),
+    land: root.append("g").attr("class", "weather-map-land-layer"),
+    boundaries: root.append("g").attr("class", "weather-map-boundary-layer"),
+    arcs: root.append("g").attr("class", "weather-map-arc-layer"),
+    points: root.append("g").attr("class", "weather-map-point-layer"),
+    labels: root.append("g").attr("class", "weather-map-label-layer"),
+    timelinePanel: svg.append("g").attr("class", "weather-map-timeline-panel-layer"),
+    dateConnectors: svg.append("g").attr("class", "weather-map-date-connector-layer"),
+    timeline: svg.append("g").attr("class", "weather-map-timeline-layer")
+  };
+  layers.base.append("path").attr("class", "weather-map-sphere");
+  layers.boundaries.append("path").attr("class", "weather-map-boundary");
+
+  const zoom = d3
+    .zoom()
+    .scaleExtent([1, 8])
+    .on("zoom", (event) => {
+      weatherMapState.currentTransform = event.transform;
+      root.attr("transform", event.transform);
+      updateWeatherMapConnectorPositions(event.transform);
+    });
+  svg.call(zoom).on("dblclick.zoom", null);
+
+  weatherMapState.svg = svg;
+  weatherMapState.root = root;
+  weatherMapState.layers = layers;
+  weatherMapState.zoom = zoom;
+  weatherMapState.currentTransform = d3.zoomIdentity;
+  weatherMapState.loadingPromise = d3
+    .json(WORLD_ATLAS_PATH)
+    .then((worldAtlas) => {
+      weatherMapState.world = {
+        land: topojson.feature(worldAtlas, worldAtlas.objects.countries).features,
+        boundaries: topojson.mesh(
+          worldAtlas,
+          worldAtlas.objects.countries,
+          (a, b) => a !== b
+        )
+      };
+      if (!weatherMapState.resizeObserver && "ResizeObserver" in window) {
+        weatherMapState.resizeObserver = new ResizeObserver(() => {
+          window.cancelAnimationFrame(weatherMapState.resizeRaf);
+          weatherMapState.resizeRaf = window.requestAnimationFrame(() => {
+            renderWeatherMap();
+          });
+        });
+        weatherMapState.resizeObserver.observe(weatherMap);
+      }
+      renderWeatherMap();
+      if (weatherMapState.pendingReset) {
+        resetWeatherMapView({ transition: false });
+      }
+      return weatherMapState.world;
+    })
+    .catch((error) => {
+      console.error(error);
+      weatherMap.innerHTML = '<p class="weather-map-status">Map failed to load.</p>';
+      return null;
+    });
+
+  return weatherMapState.loadingPromise;
+}
+
+function requestWeatherMapRender(options = {}) {
+  const loadPromise = initWeatherMap();
+  if (!weatherMapState.world) {
+    loadPromise.then(() => renderWeatherMap(options));
+    return;
+  }
+  renderWeatherMap(options);
+}
+
+function resetWeatherMapView({ transition = true, duration = 850 } = {}) {
+  if (!weatherMapState.svg || !weatherMapState.zoom || !window.d3) {
+    weatherMapState.pendingReset = true;
+    return;
+  }
+  weatherMapState.pendingReset = false;
+  const identity = d3.zoomIdentity;
+  weatherMapState.currentTransform = identity;
+
+  if (transition) {
+    weatherMapState.svg
+      .transition()
+      .duration(duration)
+      .ease(d3.easeCubicOut)
+      .call(weatherMapState.zoom.transform, identity);
+    return;
+  }
+
+  weatherMapState.svg.call(weatherMapState.zoom.transform, identity);
+}
+
+function makeCurrentMapPoint() {
+  if (!lastForecastMeta && !presentationCoords) {
+    return null;
+  }
+  const latitude = asNumber(lastForecastMeta?.latitude, asNumber(presentationCoords?.latitude));
+  const longitude = asNumber(lastForecastMeta?.longitude, asNumber(presentationCoords?.longitude));
+  const temperatureC = asNumber(lastForecastMeta?.daily?.temperature_2m_mean);
+  const cloudCover = asNumber(lastForecastMeta?.daily?.cloud_cover_mean, 0);
+  if (!isFiniteNumber(latitude) || !isFiniteNumber(longitude)) {
+    return null;
+  }
+
+  if (activeArchiveQuery) {
+    const label = activeArchiveQuery.city || "Archive day";
+    return {
+      id: "current-archive-query",
+      kind: "current",
+      latitude,
+      longitude,
+      temperatureC,
+      cloudCover,
+      dateIso: activeArchiveQuery.dateIso,
+      label,
+      detail: `${formatFullDate(activeArchiveQuery.dateIso)} · ${formatTemp(temperatureC)}`,
+      tooltipRows: [label, formatFullDate(activeArchiveQuery.dateIso), formatTemp(temperatureC)]
+    };
+  }
+
+  const place = lastForecastMeta?.timezone || "Current weather";
+  const dateIso = lastForecastMeta?.daily?.time || localIsoDate();
+  return {
+    id: "current-weather",
+    kind: "current",
+    latitude,
+    longitude,
+    temperatureC,
+    cloudCover,
+    dateIso,
+    label: "Current weather",
+    detail: `${place} · ${formatTemp(temperatureC)}`,
+    tooltipRows: ["Current weather", place, formatTemp(temperatureC)]
+  };
+}
+
+function makeMatchMapPoints(rows) {
+  return rows
+    .map((row, index) => {
+      const latitude = asNumber(row.latitude);
+      const longitude = asNumber(row.longitude);
+      if (!isFiniteNumber(latitude) || !isFiniteNumber(longitude)) {
+        return null;
+      }
+      const city = String(row.city || "Unknown place");
+      const date = String(row.date || "");
+      const temperatureC = asNumber(row.temp_mean_c);
+      const cloudCover = asNumber(row.cloud_cover_mean_pct, 0);
+      return {
+        id: makeMatchMapPointId(row, index),
+        kind: "match",
+        index,
+        latitude,
+        longitude,
+        temperatureC,
+        cloudCover,
+        dateIso: date,
+        label: city,
+        detail: `${formatFullDate(date)} · ${formatTemp(temperatureC)}`,
+        tooltipRows: [city, formatFullDate(date), formatTemp(temperatureC)]
+      };
+    })
+    .filter(Boolean);
+}
+
+function makeMatchMapPointId(row, index) {
+  const latitude = asNumber(row.latitude);
+  const longitude = asNumber(row.longitude);
+  const city = String(row.city || "Unknown place");
+  const date = String(row.date || "");
+  return `match-${index}-${city}-${date}-${formatNumber(latitude, 3)}-${formatNumber(longitude, 3)}`;
+}
+
+function refreshWeatherMapFromState(options = {}) {
+  const { animateArcs = false, clearMatches = false } = options;
+  weatherMapState.currentPoint = makeCurrentMapPoint();
+  if (clearMatches) {
+    weatherMapState.matchPoints = [];
+  } else {
+    weatherMapState.matchPoints = Array.isArray(lastPresentationRows)
+      ? makeMatchMapPoints(lastPresentationRows)
+      : [];
+  }
+  requestWeatherMapRender({ animateArcs });
+}
+
+function setWeatherMapMatches(rows, animateArcs = true) {
+  weatherMapState.currentPoint = makeCurrentMapPoint();
+  weatherMapState.matchPoints = makeMatchMapPoints(rows);
+  requestWeatherMapRender({ animateArcs });
+}
+
+function projectedMapPoint(point, projection) {
+  const projected = projection([point.longitude, point.latitude]);
+  if (!projected || !isFiniteNumber(projected[0]) || !isFiniteNumber(projected[1])) {
+    return null;
+  }
+  return { ...point, projected };
+}
+
+function projectedArcPathD(fromPoint, toPoint) {
+  const [x1, y1] = fromPoint.projected;
+  const [x2, y2] = toPoint.projected;
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const distance = Math.hypot(dx, dy);
+  if (!Number.isFinite(distance) || distance <= 0) {
+    return `M${x1},${y1}L${x2},${y2}`;
+  }
+  const arcHeight = clamp(distance * 0.32, 28, 150);
+  const normalX = -dy / distance;
+  const normalY = dx / distance;
+  const direction = x2 >= x1 ? -1 : 1;
+  const cx = (x1 + x2) / 2 + normalX * arcHeight * direction;
+  const cy = (y1 + y2) / 2 + normalY * arcHeight * direction;
+  return `M${x1},${y1}Q${cx},${cy} ${x2},${y2}`;
+}
+
+function transformedProjectedPoint(projected, transform) {
+  const activeTransform = transform || d3.zoomIdentity;
+  return typeof activeTransform.apply === "function"
+    ? activeTransform.apply(projected)
+    : projected;
+}
+
+function updateWeatherMapConnectorPositions(transform = weatherMapState.currentTransform || d3.zoomIdentity) {
+  if (!weatherMapState.layers?.dateConnectors) {
+    return;
+  }
+  weatherMapState.layers.dateConnectors
+    .selectAll("line.weather-map-date-connector")
+    .attr("x1", (d) => transformedProjectedPoint(d.projected, transform)[0])
+    .attr("y1", (d) => transformedProjectedPoint(d.projected, transform)[1]);
+}
+
+function isArcRelatedToPoint(arc, pointId) {
+  if (!pointId) {
+    return false;
+  }
+  return pointId === weatherMapState.currentPoint?.id || arc.id === pointId;
+}
+
+function applyWeatherMapHighlight() {
+  if (!weatherMapState.layers) {
+    return;
+  }
+  const highlightedId = weatherMapState.highlightedPointId;
+  const hasHighlight = Boolean(highlightedId);
+  weatherMapState.layers.points
+    .selectAll("g.weather-map-marker")
+    .classed("is-highlighted", (d) => d.id === highlightedId)
+    .classed("is-dimmed", (d) => hasHighlight && d.id !== highlightedId);
+  weatherMapState.layers.timeline
+    .selectAll("circle.weather-map-timeline-date-dot")
+    .classed("is-highlighted", (d) => d.id === highlightedId)
+    .classed("is-dimmed", (d) => hasHighlight && d.id !== highlightedId);
+  weatherMapState.layers.timeline
+    .selectAll("g.weather-map-timeline-date-tooltip")
+    .classed("is-highlighted", (d) => d.id === highlightedId);
+  weatherMapState.layers.arcs
+    .selectAll("path.weather-map-arc")
+    .classed("is-highlighted", (d) => isArcRelatedToPoint(d, highlightedId))
+    .classed("is-dimmed", (d) => hasHighlight && !isArcRelatedToPoint(d, highlightedId));
+  weatherMapState.layers.dateConnectors
+    .selectAll("line.weather-map-date-connector")
+    .classed("is-highlighted", (d) => d.id === highlightedId)
+    .classed("is-dimmed", (d) => hasHighlight && d.id !== highlightedId);
+}
+
+function setWeatherMapHighlight(pointId) {
+  weatherMapState.highlightedPointId = pointId || null;
+  applyWeatherMapHighlight();
+}
+
+function updateSvgTooltipBackgrounds(groups, textSelector, rectSelector) {
+  groups.each(function updateTooltipBackground() {
+    const group = d3.select(this);
+    const textNode = group.select(textSelector).node();
+    const rect = group.select(rectSelector);
+    if (!textNode || rect.empty()) {
+      return;
+    }
+    if (group.classed("weather-map-marker--tooltip-disabled")) {
+      rect.attr("width", 0).attr("height", 0);
+      return;
+    }
+    const box = textNode.getBBox();
+    rect
+      .attr("x", box.x - 9)
+      .attr("y", box.y - 6)
+      .attr("width", box.width + 18)
+      .attr("height", box.height + 12);
+  });
+}
+
+function setSvgTooltipLines(textSelection, getLines) {
+  textSelection.each(function updateTooltipLines(d) {
+    const lines = getLines(d).filter(Boolean);
+    d3.select(this)
+      .selectAll("tspan")
+      .data(lines)
+      .join("tspan")
+      .attr("x", 0)
+      .attr("dy", (_, index) => {
+        if (index === 0) {
+          return `${-(lines.length - 1) * 0.58}em`;
+        }
+        return "1.15em";
+      })
+      .text((line) => line);
+  });
+}
+
+function timelineTooltipRows(point) {
+  return [formatFullDate(point.dateIso)];
+}
+
+function mapTooltipRows(point) {
+  return point.suppressTooltip ? [] : [point.label, formatTemp(point.temperatureC)];
+}
+
+function getPresentationMatchRow(target) {
+  return target.closest?.("tr[data-weather-map-point-id]") || null;
+}
+
+function onPresentationRowHighlightIn(event) {
+  const row = getPresentationMatchRow(event.target);
+  if (!row) return;
+  row.classList.add("is-highlighted");
+  setWeatherMapHighlight(row.dataset.weatherMapPointId);
+}
+
+function onPresentationRowHighlightOut(event) {
+  const row = getPresentationMatchRow(event.target);
+  if (!row || row.contains(event.relatedTarget)) return;
+  row.classList.remove("is-highlighted");
+  setWeatherMapHighlight(null);
+}
+
+function stopWeatherMapTimelineEvent(event) {
+  event.stopPropagation();
+  if (event.type === "wheel" || event.type === "dblclick") {
+    event.preventDefault();
+  }
+}
+
+function renderWeatherMap(options = {}) {
+  if (!weatherMapState.world || !weatherMapState.svg || !weatherMapState.layers || !weatherMap) {
+    return;
+  }
+  const width = Math.max(320, Math.round(weatherMap.clientWidth || 0));
+  const height = Math.max(360, Math.round(weatherMap.clientHeight || 0));
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const shouldAnimateArcs = Boolean(options.animateArcs && !reducedMotion);
+  const timelinePanelHeight = 56;
+  const timelinePanelX = 16;
+  const timelinePanelWidth = Math.max(0, width - timelinePanelX * 2);
+  const timelinePanelY = Math.max(16, height - timelinePanelHeight - WEATHER_MAP_TIMELINE_BOTTOM_OFFSET);
+  const timelineY = timelinePanelY + timelinePanelHeight / 2;
+  const timelineLabelInset = 16;
+  const timelineLabelWidth = 44;
+  const timelineStartX = timelinePanelX + timelineLabelInset + timelineLabelWidth;
+  const timelineEndX = timelinePanelX + timelinePanelWidth - timelineLabelInset - timelineLabelWidth;
+  const timelineLabelStartX = timelinePanelX + timelineLabelInset;
+  const timelineLabelEndX = timelinePanelX + timelinePanelWidth - timelineLabelInset;
+  const timelineStartDate = parseIsoDateOnly(WEATHER_MAP_TIMELINE_START_ISO) || new Date(2000, 0, 1);
+  const timelineEndDate = parseIsoDateOnly(localIsoDate()) || new Date();
+  const timelineScale = d3
+    .scaleTime()
+    .domain([timelineStartDate, timelineEndDate])
+    .range([timelineStartX, timelineEndX])
+    .clamp(true);
+  const projection = d3
+    .geoModifiedStereographicGs50()
+    .precision(0.1)
+    .fitExtent(
+      [
+        [12, 36],
+        [width - 12, height - WEATHER_MAP_TIMELINE_MAP_PADDING]
+      ],
+      WEATHER_MAP_FOCUS_GEOMETRY
+    );
+  const path = d3.geoPath(projection);
+
+  weatherMapState.svg
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", `0 0 ${width} ${height}`);
+
+  if (weatherMapState.zoom) {
+    weatherMapState.zoom
+      .extent([
+        [0, 0],
+        [width, height]
+      ])
+      .translateExtent([
+        [-width, -height],
+        [width * 2, height * 2]
+      ]);
+  }
+  if (weatherMapState.root) {
+    weatherMapState.root.attr("transform", weatherMapState.currentTransform || d3.zoomIdentity);
+  }
+
+  weatherMapState.layers.base
+    .select(".weather-map-sphere")
+    .datum({ type: "Sphere" })
+    .attr("d", path);
+
+  weatherMapState.layers.land
+    .selectAll("path")
+    .data(weatherMapState.world.land)
+    .join("path")
+    .attr("class", "weather-map-land")
+    .attr("d", path);
+
+  weatherMapState.layers.boundaries
+    .select(".weather-map-boundary")
+    .datum(weatherMapState.world.boundaries)
+    .attr("d", path);
+
+  const currentPoint = weatherMapState.currentPoint
+    ? projectedMapPoint(weatherMapState.currentPoint, projection)
+    : null;
+  const matchPoints = weatherMapState.matchPoints
+    .map((point) => projectedMapPoint(point, projection))
+    .filter(Boolean);
+  const suppressCurrentTooltip = presentationSearchInProgress || matchPoints.length > 0;
+  const pointData = currentPoint
+    ? [{ ...currentPoint, suppressTooltip: suppressCurrentTooltip }, ...matchPoints]
+    : matchPoints;
+  const timelinePointData = pointData
+    .map((point) => {
+      const date = parseIsoDateOnly(point.dateIso);
+      if (!date) {
+        return null;
+      }
+      return {
+        ...point,
+        date,
+        timelineX: timelineScale(date),
+        timelineY
+      };
+    })
+    .filter(Boolean);
+  const visiblePointIds = new Set(pointData.map((point) => point.id));
+  if (weatherMapState.highlightedPointId && !visiblePointIds.has(weatherMapState.highlightedPointId)) {
+    weatherMapState.highlightedPointId = null;
+  }
+  const arcData = currentPoint
+    ? matchPoints.map((point) => ({
+        id: point.id,
+        index: point.index,
+        pathD: projectedArcPathD(currentPoint, point)
+      }))
+    : [];
+
+  weatherMapState.layers.dateConnectors
+    .selectAll("line.weather-map-date-connector")
+    .data(timelinePointData, (d) => d.id)
+    .join(
+      (enter) => enter
+        .append("line")
+        .attr("class", (d) => `weather-map-date-connector weather-map-date-connector--${d.kind}`)
+        .style("opacity", (d) => (shouldAnimateArcs && d.kind !== "current" ? 0 : 1)),
+      (update) => update,
+      (exit) => exit.remove()
+    )
+    .attr("class", (d) => `weather-map-date-connector weather-map-date-connector--${d.kind}`)
+    .attr("x2", (d) => d.timelineX)
+    .attr("y2", (d) => d.timelineY);
+  updateWeatherMapConnectorPositions();
+
+  const timelinePanelData = [{
+    id: "timeline-panel",
+    x: timelinePanelX,
+    y: timelinePanelY,
+    width: timelinePanelWidth,
+    height: timelinePanelHeight
+  }];
+  weatherMapState.layers.timelinePanel
+    .selectAll("rect.weather-map-timeline-panel")
+    .data(timelinePanelData, (d) => d.id)
+    .join("rect")
+    .attr("class", "weather-map-timeline-panel")
+    .attr("x", (d) => d.x)
+    .attr("y", (d) => d.y)
+    .attr("width", (d) => d.width)
+    .attr("height", (d) => d.height)
+    .attr("rx", 16)
+    .attr("ry", 16)
+    .on("mousedown.timelineBlock touchstart.timelineBlock pointerdown.timelineBlock wheel.timelineBlock dblclick.timelineBlock", stopWeatherMapTimelineEvent);
+
+  const timelineLineData = [{ id: "timeline", x1: timelineStartX, x2: timelineEndX, y: timelineY }];
+  weatherMapState.layers.timeline
+    .selectAll("line.weather-map-timeline-line")
+    .data(timelineLineData, (d) => d.id)
+    .join("line")
+    .attr("class", "weather-map-timeline-line")
+    .attr("x1", (d) => d.x1)
+    .attr("x2", (d) => d.x2)
+    .attr("y1", (d) => d.y)
+    .attr("y2", (d) => d.y);
+
+  const timelineLabelData = [
+    { id: "start", text: "2000", x: timelineLabelStartX, y: timelineY, anchor: "start" },
+    { id: "end", text: String(timelineEndDate.getFullYear()), x: timelineLabelEndX, y: timelineY, anchor: "end" }
+  ];
+  weatherMapState.layers.timeline
+    .selectAll("text.weather-map-timeline-label")
+    .data(timelineLabelData, (d) => d.id)
+    .join("text")
+    .attr("class", "weather-map-timeline-label")
+    .attr("x", (d) => d.x)
+    .attr("y", (d) => d.y)
+    .attr("dominant-baseline", "middle")
+    .attr("text-anchor", (d) => d.anchor)
+    .text((d) => d.text);
+
+  const timelineDots = weatherMapState.layers.timeline
+    .selectAll("circle.weather-map-timeline-date-dot")
+    .data(timelinePointData, (d) => d.id)
+    .join(
+      (enter) => enter
+        .append("circle")
+        .attr("class", (d) => `weather-map-timeline-date-dot weather-map-timeline-date-dot--${d.kind}`)
+        .style("opacity", (d) => (shouldAnimateArcs && d.kind !== "current" ? 0 : 1)),
+      (update) => update,
+      (exit) => exit.remove()
+    )
+    .attr("class", (d) => `weather-map-timeline-date-dot weather-map-timeline-date-dot--${d.kind}`)
+    .attr("tabindex", 0)
+    .attr("role", "img")
+    .attr("aria-label", (d) => `Timeline date for ${(d.tooltipRows || [d.label, d.detail]).filter(Boolean).join(". ")}`)
+    .attr("cx", (d) => d.timelineX)
+    .attr("cy", (d) => d.timelineY)
+    .attr("r", (d) => (d.kind === "current" ? 6.9 : 3.6))
+    .attr("fill", (d) => temperatureColor(d.temperatureC))
+    .style("filter", (d) => weatherPointFilter(d))
+    .on("mouseenter", (event, d) => setWeatherMapHighlight(d.id))
+    .on("mouseleave", () => setWeatherMapHighlight(null))
+    .on("focus", (event, d) => setWeatherMapHighlight(d.id))
+    .on("blur", () => setWeatherMapHighlight(null))
+    .on("mousedown.timelineBlock touchstart.timelineBlock pointerdown.timelineBlock wheel.timelineBlock dblclick.timelineBlock", stopWeatherMapTimelineEvent);
+
+  weatherMapState.layers.timeline
+    .selectAll("g.weather-map-timeline-date-tooltip")
+    .data(timelinePointData, (d) => d.id)
+    .join(
+      (enter) => {
+        const tooltip = enter.append("g").attr("class", "weather-map-timeline-date-tooltip");
+        tooltip.append("rect").attr("class", "weather-map-tooltip-bg").attr("rx", 8).attr("ry", 8);
+        tooltip.append("text").attr("class", "weather-map-timeline-date-label");
+        return tooltip;
+      },
+      (update) => update,
+      (exit) => exit.remove()
+    )
+    .attr("class", "weather-map-timeline-date-tooltip")
+    .attr("transform", (d) => `translate(${d.timelineX}, ${d.timelineY - 24})`)
+    .call((tooltip) => {
+      tooltip
+        .select("text.weather-map-timeline-date-label")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("dominant-baseline", "middle")
+        .attr("text-anchor", "middle")
+        .call((text) => setSvgTooltipLines(text, timelineTooltipRows));
+      updateSvgTooltipBackgrounds(
+        tooltip,
+        "text.weather-map-timeline-date-label",
+        "rect.weather-map-tooltip-bg"
+      );
+    });
+
+  const arcs = weatherMapState.layers.arcs
+    .selectAll("path")
+    .data(arcData, (d) => d.id)
+    .join(
+      (enter) => enter.append("path").attr("class", "weather-map-arc"),
+      (update) => update,
+      (exit) => exit.remove()
+    )
+    .attr("d", (d) => d.pathD);
+
+  arcs.interrupt();
+  if (shouldAnimateArcs) {
+    arcs.each(function animateArc(d) {
+      const length = this.getTotalLength();
+      d3.select(this)
+        .attr("stroke-dasharray", `${length} ${length}`)
+        .attr("stroke-dashoffset", length)
+        .transition()
+        .delay(d.index * PRESENTATION_ROW_CYCLE_MS)
+        .duration(WEATHER_MAP_ARC_DURATION_MS)
+        .ease(d3.easeCubicOut)
+        .attr("stroke-dashoffset", 0);
+    });
+  } else {
+    arcs.attr("stroke-dasharray", null).attr("stroke-dashoffset", null);
+  }
+
+  const timelineAnimatedItems = weatherMapState.layers.dateConnectors
+    .selectAll("line.weather-map-date-connector");
+  timelineAnimatedItems.interrupt();
+  timelineDots.interrupt();
+  if (shouldAnimateArcs) {
+    timelineAnimatedItems
+      .style("opacity", (d) => (d.kind === "current" ? 1 : 0))
+      .transition()
+      .delay((d) => (d.kind === "current" ? 0 : d.index * PRESENTATION_ROW_CYCLE_MS))
+      .duration(420)
+      .ease(d3.easeCubicOut)
+      .style("opacity", 1);
+    timelineDots
+      .style("opacity", (d) => (d.kind === "current" ? 1 : 0))
+      .transition()
+      .delay((d) => (d.kind === "current" ? 0 : d.index * PRESENTATION_ROW_CYCLE_MS))
+      .duration(320)
+      .ease(d3.easeCubicOut)
+      .style("opacity", 1);
+  } else {
+    timelineAnimatedItems.style("opacity", null);
+    timelineDots.style("opacity", null);
+  }
+
+  const markerEnter = (enter) => {
+    const marker = enter
+      .append("g")
+      .attr("class", (d) => `weather-map-marker weather-map-marker--${d.kind}`)
+      .attr("tabindex", 0)
+      .attr("role", "img");
+    marker.append("circle");
+    marker.append("rect").attr("class", "weather-map-tooltip-bg weather-map-label-bg").attr("rx", 8).attr("ry", 8);
+    marker.append("text").attr("class", (d) => `weather-map-label weather-map-label--${d.kind}`);
+    return marker;
+  };
+  const markers = weatherMapState.layers.points
+    .selectAll("g")
+    .data(pointData, (d) => d.id)
+    .join(markerEnter, (update) => update, (exit) => exit.remove())
+    .attr("class", (d) => {
+      const disabledClass = d.suppressTooltip ? " weather-map-marker--tooltip-disabled" : "";
+      return `weather-map-marker weather-map-marker--${d.kind}${disabledClass}`;
+    })
+    .attr("tabindex", (d) => (d.suppressTooltip ? null : 0))
+    .attr("transform", (d) => `translate(${d.projected[0]}, ${d.projected[1]})`)
+    .attr("aria-label", (d) => {
+      if (d.suppressTooltip) {
+        return d.label;
+      }
+      return (d.tooltipRows || [d.label, d.detail]).filter(Boolean).join(". ");
+    })
+    .on("mouseenter", (event, d) => setWeatherMapHighlight(d.id))
+    .on("mouseleave", () => setWeatherMapHighlight(null))
+    .on("focus", (event, d) => setWeatherMapHighlight(d.id))
+    .on("blur", () => setWeatherMapHighlight(null));
+
+  markers.interrupt();
+  if (shouldAnimateArcs) {
+    markers
+      .attr("opacity", (d) => (d.kind === "current" ? 1 : 0))
+      .transition()
+      .delay((d) => (d.kind === "current" ? 0 : d.index * PRESENTATION_ROW_CYCLE_MS))
+      .duration(320)
+      .ease(d3.easeCubicOut)
+      .attr("opacity", 1);
+  } else {
+    markers.attr("opacity", 1);
+  }
+
+  markers
+    .select("circle")
+    .attr("class", (d) => `weather-map-point weather-map-point--${d.kind}`)
+    .attr("r", (d) => temperatureRadius(d.temperatureC, d.kind))
+    .attr("fill", (d) => temperatureColor(d.temperatureC))
+    .style("filter", (d) => weatherPointFilter(d));
+
+  markers
+    .select("text")
+    .attr("class", (d) => `weather-map-label weather-map-label--${d.kind}`)
+    .attr("x", 0)
+    .attr("y", (d) => -temperatureRadius(d.temperatureC, d.kind) - 26)
+    .attr("dominant-baseline", "middle")
+    .attr("text-anchor", "middle")
+    .call((text) => setSvgTooltipLines(text, mapTooltipRows));
+  updateSvgTooltipBackgrounds(markers, "text.weather-map-label", "rect.weather-map-tooltip-bg");
+  applyWeatherMapHighlight();
+}
+
 function skyCssClassForDaily(daily) {
   const rain = Math.max(0, asNumber(daily.rain_sum));
   const snow = Math.max(0, asNumber(daily.snowfall_sum));
@@ -297,69 +1185,108 @@ function skyCssClassForDaily(daily) {
   return "sky-mixed";
 }
 
-function precipPhrase(daily) {
+function precipCondition(daily) {
   const rain = Math.max(0, asNumber(daily.rain_sum));
   const snow = Math.max(0, asNumber(daily.snowfall_sum));
   if (snow >= 0.1) {
-    return `, with about ${formatNumber(daily.snowfall_sum)} cm of snow`;
+    return `${formatNumber(daily.snowfall_sum)} cm of snow`;
   }
   if (rain >= 1) {
-    return `, with about ${formatNumber(daily.rain_sum)} mm of rain`;
+    return `${formatNumber(daily.rain_sum)} mm of rain`;
   }
   if (rain >= 0.1) {
-    return ", with light rain";
+    return "light rain";
   }
-  return ", with no significant rain or snow";
+  return "no rain or snow";
+}
+
+function precipConditionClass(daily) {
+  const rain = Math.max(0, asNumber(daily.rain_sum));
+  const snow = Math.max(0, asNumber(daily.snowfall_sum));
+  return rain < 0.1 && snow < 0.1
+    ? "presentation-precip-condition presentation-precip-condition--dry"
+    : "presentation-precip-condition";
+}
+
+function cloudCoverInfo(daily) {
+  const cloud = asNumber(daily.cloud_cover_mean);
+  if (!isFiniteNumber(cloud)) {
+    return {
+      text: "unknown cloud cover",
+      className: "presentation-cloud-condition presentation-cloud-condition--unknown"
+    };
+  }
+  if (cloud <= 20) {
+    return {
+      text: "mostly clear skies",
+      className: "presentation-cloud-condition presentation-cloud-condition--clear"
+    };
+  }
+  if (cloud <= 50) {
+    return {
+      text: "some cloud cover",
+      className: "presentation-cloud-condition presentation-cloud-condition--some"
+    };
+  }
+  if (cloud <= 80) {
+    return {
+      text: "cloudy skies",
+      className: "presentation-cloud-condition presentation-cloud-condition--cloudy"
+    };
+  }
+  return {
+    text: "overcast skies",
+    className: "presentation-cloud-condition presentation-cloud-condition--overcast"
+  };
+}
+
+function buildWeatherDataLineHtml(daily, { archive = false } = {}) {
+  const tClass = tempCssClass(daily.temperature_2m_mean);
+  const tempStr = formatTemp(daily.temperature_2m_mean);
+  const tense = archive ? "It was" : "It is";
+  const precipConnector = archive ? "there was" : "with";
+  const cloud = cloudCoverInfo(daily);
+  return `
+    <span class="presentation-weather-data">
+      ${tense} <span class="${tClass}">${escapeHtml(tempStr)}</span>,
+      ${precipConnector} <span class="${precipConditionClass(daily)}">${escapeHtml(precipCondition(daily))}</span>,
+      and <span class="${cloud.className}">${escapeHtml(cloud.text)}</span>.
+    </span>
+  `;
+}
+
+function cityNameFromTimezone(timezone) {
+  const raw = String(timezone || "").trim();
+  if (!raw) {
+    return "your city";
+  }
+  const city = raw.split("/").pop().replaceAll("_", " ").trim();
+  return city || raw;
 }
 
 function buildPresentationNarrativeHtml(daily, forecastMeta) {
-  const intCode = Math.round(asNumber(daily.weather_code));
-  const wmoLabel = WMO_DESCRIPTIONS[intCode] || "mixed conditions";
-  const wmoLower = wmoLabel.charAt(0).toLowerCase() + wmoLabel.slice(1);
-  const skyClass = skyCssClassForDaily(daily);
-  const tClass = tempCssClass(daily.temperature_2m_mean);
-  const tempStr = formatTemp(daily.temperature_2m_mean);
-  const tz = forecastMeta.timezone ? escapeHtml(String(forecastMeta.timezone)) : "your area";
-  const lat = forecastMeta.latitude != null ? forecastMeta.latitude : presentationCoords?.latitude;
-  const lon = forecastMeta.longitude != null ? forecastMeta.longitude : presentationCoords?.longitude;
-  const locLine = isFiniteNumber(lat) && isFiniteNumber(lon)
-    ? `<p class="presentation-loc">(${tz} · ${formatNumber(lat, 2)}°, ${formatNumber(lon, 2)}°)</p>`
-    : `<p class="presentation-loc">(${tz})</p>`;
+  const city = escapeHtml(cityNameFromTimezone(forecastMeta.timezone));
+  const dateLabel = escapeHtml(formatFullDate(daily.time || localIsoDate()));
 
   return `
     <p class="presentation-lede">
-      Today it is <span class="${skyClass}">${escapeHtml(wmoLower)}</span>,
-      <span class="${tClass}">${escapeHtml(tempStr)}</span>${escapeHtml(precipPhrase(daily))}.
-      What else happened on a day like this?
+      Today is <strong>${dateLabel}</strong> in <strong>${city}</strong>.
+      ${buildWeatherDataLineHtml(daily)}
+      <span class="presentation-question">Who else experienced a day like this?</span>
     </p>
-    ${locLine}
   `;
 }
 
 function buildPresentationNarrativeHtmlFromArchive(rawRow, dateIso, cityLabel) {
   const daily = dailyLikeFromRawRow(rawRow);
-  const intCode = Math.round(asNumber(daily.weather_code));
-  const wmoLabel = WMO_DESCRIPTIONS[intCode] || "mixed conditions";
-  const wmoLower = wmoLabel.charAt(0).toLowerCase() + wmoLabel.slice(1);
-  const skyClass = skyCssClassForDaily(daily);
-  const tClass = tempCssClass(daily.temperature_2m_mean);
-  const tempStr = formatTemp(daily.temperature_2m_mean);
-  const tz = rawRow.timezone ? escapeHtml(String(rawRow.timezone)) : "archive";
-  const lat = Number(rawRow.latitude);
-  const lon = Number(rawRow.longitude);
-  const locLine = isFiniteNumber(lat) && isFiniteNumber(lon)
-    ? `<p class="presentation-loc">(${tz} · ${formatNumber(lat, 2)}°, ${formatNumber(lon, 2)}°)</p>`
-    : `<p class="presentation-loc">(${tz})</p>`;
   const place = escapeHtml(String(cityLabel || rawRow.city || ""));
 
   return `
     <p class="presentation-lede">
-      On <strong>${escapeHtml(formatFullDate(dateIso))}</strong> in <strong>${place}</strong>,
-      it was <span class="${skyClass}">${escapeHtml(wmoLower)}</span>,
-      <span class="${tClass}">${escapeHtml(tempStr)}</span>${escapeHtml(precipPhrase(daily))}.
-      What else happened on a day like this?
+      On <strong>${escapeHtml(formatFullDate(dateIso))}</strong> in <strong>${place}</strong>.
+      ${buildWeatherDataLineHtml(daily, { archive: true })}
+      <span class="presentation-question">Who else experienced a day like this?</span>
     </p>
-    ${locLine}
   `;
 }
 
@@ -367,9 +1294,15 @@ async function initPresentationWeather() {
   stopPresentationSkyRefresh();
   clearPresentationSkyTheme();
   activeArchiveQuery = null;
-  searchHistoryButton.disabled = true;
+  document.body.classList.remove("pres-archive-visible");
+  setPresentationSimilarVisible(false);
+  setSearchHistoryLoading(false);
+  setSearchHistoryWeatherReady(false);
   presentationCards.innerHTML = "";
   lastPresentationRows = null;
+  lastForecastMeta = null;
+  presentationCoords = null;
+  refreshWeatherMapFromState({ clearMatches: true });
   presentationNarrative.innerHTML = "<p>Locating you…</p>";
   setStatus("Getting location…");
 
@@ -381,16 +1314,20 @@ async function initPresentationWeather() {
     const forecastMeta = await fetchCurrentWeather(latitude, longitude);
     lastForecastMeta = forecastMeta;
     presentationNarrative.innerHTML = buildPresentationNarrativeHtml(forecastMeta.daily, forecastMeta);
+    setSearchHistoryWeatherReady(true);
+    setStatus("Ready. Search through history to find similar days.");
     applyPresentationSkyThemeFromMeta(forecastMeta);
+    refreshWeatherMapFromState({ clearMatches: true });
     startPresentationSkyRefresh();
-    searchHistoryButton.disabled = false;
-    setStatus("Ready. Search through history to find similar days and reveal them.");
   } catch (error) {
     presentationCoords = null;
     lastForecastMeta = null;
+    refreshWeatherMapFromState({ clearMatches: true });
     clearPresentationSkyTheme();
     presentationNarrative.innerHTML = `<p class="presentation-error">${escapeHtml(error.message)}</p>`;
     setStatus(`Error: ${error.message}`);
+  } finally {
+    scheduleArchivePickerUiInit(true);
   }
 }
 
@@ -401,8 +1338,14 @@ async function onPresentationSearchAndReveal() {
   }
 
   searchHistoryButton.disabled = true;
+  searchHistoryButton.textContent = SEARCH_HISTORY_READY_TEXT;
+  setSearchHistoryLoading(true);
+  setPresentationSimilarVisible(true);
   presentationCards.innerHTML = "";
   lastPresentationRows = null;
+  presentationSearchInProgress = true;
+  refreshWeatherMapFromState({ clearMatches: true });
+  resetWeatherMapView({ transition: true });
   setStatus("Loading archive, matching, and revealing…");
 
   try {
@@ -411,15 +1354,23 @@ async function onPresentationSearchAndReveal() {
           city: activeArchiveQuery.city,
           dateIso: activeArchiveQuery.dateIso,
           topN: TOP_N_PRESENTATION,
-          dedupeByLocation: true,
+          dedupeByLocation: false,
           setStatusMessages: false
         })
       : await runSimilarityPipeline({
           latitude: presentationCoords.latitude,
           longitude: presentationCoords.longitude,
           topN: TOP_N_PRESENTATION,
-          dedupeByLocation: true
+          dedupeByLocation: false
         });
+    if (!activeArchiveQuery && result.forecastMeta) {
+      lastForecastMeta = result.forecastMeta;
+      presentationCoords = {
+        latitude: result.latitude,
+        longitude: result.longitude
+      };
+      refreshWeatherMapFromState({ clearMatches: true });
+    }
     const rows = result.nearest;
     if (!rows.length) {
       setStatus("No similar days found.");
@@ -430,21 +1381,26 @@ async function onPresentationSearchAndReveal() {
     }
     lastPresentationRows = rows;
     revealPresentationRows(rows);
-    setStatus(`Done. Showing ${rows.length} similar days (one row per city / location).`);
+    document.body.classList.add("pres-archive-visible");
+    setStatus(`Done. Showing ${rows.length} similar days.`);
   } catch (error) {
     setStatus(`Error: ${error.message}`);
   } finally {
-    searchHistoryButton.disabled = false;
+    presentationSearchInProgress = false;
+    setSearchHistoryLoading(false);
+    setSearchHistoryWeatherReady(true);
   }
 }
 
 function revealPresentationRows(rows) {
+  setPresentationSimilarVisible(true);
   presentationCards.innerHTML = "";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  rows.forEach((row) => {
-    presentationCards.insertAdjacentHTML("beforeend", buildPresentationTableRowHtml(row));
+  rows.forEach((row, index) => {
+    presentationCards.insertAdjacentHTML("beforeend", buildPresentationTableRowHtml(row, index));
   });
+  setWeatherMapMatches(rows, true);
 
   const rowEls = Array.from(presentationCards.querySelectorAll("tr"));
 
@@ -473,10 +1429,11 @@ function revealPresentationRows(rows) {
   });
 }
 
-function buildPresentationTableRowHtml(row) {
-  const locText = `${escapeHtml(row.city)} · ${formatNumber(row.latitude, 1)}°, ${formatNumber(row.longitude, 1)}°`;
+function buildPresentationTableRowHtml(row, index) {
+  const locText = escapeHtml(row.city);
+  const mapPointId = makeMatchMapPointId(row, index);
   return `
-    <tr>
+    <tr data-weather-map-point-id="${escapeHtml(mapPointId)}" tabindex="0">
       <td class="pres-phase1 presentation-reveal-cell">${escapeHtml(formatFullDate(row.date))}</td>
       <td class="pres-phase1 presentation-reveal-cell presentation-cell--loc">${locText}</td>
       <td class="pres-phase2 presentation-reveal-cell"><span class="${tempCssClass(row.temp_mean_c)}">${formatTemp(row.temp_mean_c)}</span></td>
@@ -614,6 +1571,7 @@ function renderPresentationArchiveQuery(result, city, dateIso, revealRows = true
   startPresentationSkyRefresh();
   lastPresentationRows = result.nearest;
   presentationCards.innerHTML = "";
+  refreshWeatherMapFromState({ clearMatches: true });
   if (revealRows && result.nearest.length) {
     revealPresentationRows(result.nearest);
   }
@@ -779,9 +1737,9 @@ function lerpRgb(a, b, t) {
   };
 }
 
-function mixTowardWhite(rgb, amount) {
-  const w = { r: 255, g: 255, b: 255 };
-  return lerpRgb(rgb, w, amount);
+function buildDarkPresentationStoryGradient(endRgb) {
+  const storyEnd = lerpRgb(endRgb, { r: 12, g: 22, b: 38 }, 0.72);
+  return `linear-gradient(135deg, rgba(13,24,42,0.94) 0%, ${rgbToCss(storyEnd)} 100%)`;
 }
 
 function vec3TupleToRgb(bottomVec) {
@@ -799,12 +1757,11 @@ function fallbackPresentationGradients(isDay) {
   const dayB = { r: 200, g: 230, b: 255 };
   if (isDay) {
     const skyGradient = `linear-gradient(to bottom, ${rgbToCss(dayA)} 0%, ${rgbToCss(dayB)} 100%)`;
-    const storyGradient = `linear-gradient(135deg, rgba(255,255,255,0.97) 0%, ${rgbToCss(mixTowardWhite(dayB, 0.88))} 100%)`;
+    const storyGradient = buildDarkPresentationStoryGradient(dayB);
     return { skyGradient, storyGradient };
   }
   const skyGradient = `linear-gradient(to bottom, ${rgbToCss(nightA)} 0%, ${rgbToCss(nightB)} 100%)`;
-  const storyGradient =
-    "linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(232,240,252,1) 100%)";
+  const storyGradient = buildDarkPresentationStoryGradient(nightB);
   return { skyGradient, storyGradient };
 }
 
@@ -838,8 +1795,7 @@ function computePresentationSkyState(nowMs, sunriseMs, sunsetMs, utcOffsetSecond
       const out = globalThis.renderHorizonGradient(alt);
       const skyGradient = out[0];
       const bottomRgb = vec3TupleToRgb(out[2]);
-      const storyEnd = mixTowardWhite(bottomRgb, 0.82);
-      const storyGradient = `linear-gradient(135deg, rgba(255,255,255,0.96) 0%, ${rgbToCss(storyEnd)} 100%)`;
+      const storyGradient = buildDarkPresentationStoryGradient(bottomRgb);
       return { isDay, skyGradient, storyGradient };
     }
   }
@@ -861,19 +1817,14 @@ function applyPresentationSkyThemeFromMeta(forecastMeta) {
     forecastMeta.latitude != null ? Number(forecastMeta.latitude) : presentationCoords?.latitude;
   const lon =
     forecastMeta.longitude != null ? Number(forecastMeta.longitude) : presentationCoords?.longitude;
-  const state = computePresentationSkyState(Date.now(), sunriseMs, sunsetMs, offset, lat, lon);
+  const state = PRESENTATION_FORCE_DARK_THEME
+    ? { isDay: false, ...fallbackPresentationGradients(false) }
+    : computePresentationSkyState(Date.now(), sunriseMs, sunsetMs, offset, lat, lon);
 
   document.body.style.setProperty("--pres-sky-gradient", state.skyGradient);
   document.body.style.setProperty("--pres-story-gradient", state.storyGradient);
   document.body.classList.toggle("pres-sky--day", state.isDay);
   document.body.classList.toggle("pres-sky--night", !state.isDay);
-
-  if (presentationSkySun) {
-    presentationSkySun.hidden = !state.isDay;
-  }
-  if (presentationSkyMoon) {
-    presentationSkyMoon.hidden = state.isDay;
-  }
 }
 
 function clearPresentationSkyTheme() {
@@ -881,12 +1832,6 @@ function clearPresentationSkyTheme() {
   document.body.style.removeProperty("--pres-sky-gradient");
   document.body.style.removeProperty("--pres-story-gradient");
   document.body.classList.remove("pres-sky--day", "pres-sky--night");
-  if (presentationSkySun) {
-    presentationSkySun.hidden = true;
-  }
-  if (presentationSkyMoon) {
-    presentationSkyMoon.hidden = true;
-  }
 }
 
 function stopPresentationSkyRefresh() {
@@ -1125,39 +2070,76 @@ async function loadScalerConfig() {
   if (scalerConfigCache) {
     return scalerConfigCache;
   }
-  const response = await fetch(SCALER_PATH);
-  if (!response.ok) {
-    throw new Error(`Could not load scaler JSON at ${SCALER_PATH}.`);
+  if (!scalerConfigPromise) {
+    scalerConfigPromise = fetch(SCALER_PATH)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Could not load scaler JSON at ${SCALER_PATH}.`);
+        }
+        return response.json();
+      })
+      .then((config) => {
+        scalerConfigCache = config;
+        return scalerConfigCache;
+      })
+      .catch((error) => {
+        scalerConfigPromise = null;
+        throw error;
+      });
   }
-  scalerConfigCache = await response.json();
-  return scalerConfigCache;
+  return scalerConfigPromise;
 }
 
 async function loadHistoryRows() {
   if (historyRowsCache) {
     return historyRowsCache;
   }
-  const response = await fetch(NORMALIZED_CSV_PATH);
-  if (!response.ok) {
-    throw new Error(`Could not load normalized CSV at ${NORMALIZED_CSV_PATH}.`);
+  if (!historyRowsPromise) {
+    historyRowsPromise = fetch(NORMALIZED_JSON_PATH)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Could not load normalized JSON at ${NORMALIZED_JSON_PATH}.`);
+        }
+        return response.json();
+      })
+      .then((rows) => {
+        if (!Array.isArray(rows)) {
+          throw new Error("Normalized JSON must be an array of weather rows.");
+        }
+        historyRowsCache = rows;
+        return historyRowsCache;
+      })
+      .catch((error) => {
+        historyRowsPromise = null;
+        throw error;
+      });
   }
-  const csvText = await response.text();
-  historyRowsCache = parseCsv(csvText);
-  return historyRowsCache;
+  return historyRowsPromise;
 }
 
 async function loadRawHistoryRows() {
   if (rawHistoryRowsCache && rawHistoryIndexCache) {
     return rawHistoryRowsCache;
   }
-  const response = await fetch(RAW_CSV_PATH);
-  if (!response.ok) {
-    throw new Error(`Could not load raw history CSV at ${RAW_CSV_PATH}.`);
+  if (!rawHistoryRowsPromise) {
+    rawHistoryRowsPromise = fetch(RAW_CSV_PATH)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Could not load raw history CSV at ${RAW_CSV_PATH}.`);
+        }
+        return response.text();
+      })
+      .then((csvText) => {
+        rawHistoryRowsCache = parseCsv(csvText);
+        rawHistoryIndexCache = new Map(rawHistoryRowsCache.map((row) => [makeHistoryKey(row), row]));
+        return rawHistoryRowsCache;
+      })
+      .catch((error) => {
+        rawHistoryRowsPromise = null;
+        throw error;
+      });
   }
-  const csvText = await response.text();
-  rawHistoryRowsCache = parseCsv(csvText);
-  rawHistoryIndexCache = new Map(rawHistoryRowsCache.map((row) => [makeHistoryKey(row), row]));
-  return rawHistoryRowsCache;
+  return rawHistoryRowsPromise;
 }
 
 function parseCsv(csvText) {
@@ -1273,7 +2255,7 @@ function validateScalerConfig(config) {
 
 function validateHistorySchema(rows, featureCols) {
   if (!rows.length) {
-    throw new Error("No historical rows were parsed from normalized CSV.");
+    throw new Error("No historical rows were loaded from normalized data.");
   }
   const requiredMeta = ["date", "city", "latitude", "longitude"];
   const sample = rows[0];
@@ -1414,6 +2396,37 @@ function archivePickerSetEnabled(enabled) {
   });
 }
 
+function scheduleArchivePickerUiInit(waitForIdle = true) {
+  if (archivePickerInitStarted || archivePickerReady) {
+    return;
+  }
+  archivePickerInitStarted = true;
+  const start = () => {
+    initArchivePickerUi();
+  };
+  if (waitForIdle && "requestIdleCallback" in window) {
+    window.requestIdleCallback(start, { timeout: 2500 });
+    return;
+  }
+  window.setTimeout(start, waitForIdle ? 500 : 0);
+}
+
+function waitForPresentationSearchIdle() {
+  if (!presentationSearchInProgress) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    const check = () => {
+      if (!presentationSearchInProgress) {
+        resolve();
+        return;
+      }
+      window.setTimeout(check, 150);
+    };
+    check();
+  });
+}
+
 async function initArchivePickerUi() {
   if (!archivePickCity || !archivePickYear || !archivePickMonth || !archivePickDay || !archivePickRun) {
     return;
@@ -1421,7 +2434,9 @@ async function initArchivePickerUi() {
   archivePickerSetEnabled(false);
   archivePickRun.textContent = "Loading archive…";
   try {
+    await waitForPresentationSearchIdle();
     const rows = await loadHistoryRows();
+    await waitForPresentationSearchIdle();
     archivePickerModel = buildArchivePickerModel(rows);
     if (!archivePickerModel.cities.length) {
       archivePickRun.textContent = "No locations";
@@ -1441,6 +2456,7 @@ async function initArchivePickerUi() {
       archivePickRun.addEventListener("click", onArchivePickerSubmit);
     }
   } catch (err) {
+    archivePickerInitStarted = false;
     archivePickRun.textContent = "Archive failed to load";
     console.error(err);
   }
@@ -1465,11 +2481,15 @@ async function onArchivePickerSubmit() {
   archivePickRun.disabled = true;
   try {
     if (isPresentationMode) {
+      presentationSearchInProgress = true;
+      setPresentationSimilarVisible(true);
+      refreshWeatherMapFromState({ clearMatches: true });
+      resetWeatherMapView({ transition: true });
       const result = await runSimilarityFromArchiveRow({
         city,
         dateIso,
         topN: TOP_N_PRESENTATION,
-        dedupeByLocation: true,
+        dedupeByLocation: false,
         setStatusMessages: false
       });
       renderPresentationArchiveQuery(result, city, dateIso, true);
@@ -1501,6 +2521,9 @@ async function onArchivePickerSubmit() {
       setStatus(`Error: ${error.message}`);
     }
   } finally {
+    if (isPresentationMode) {
+      presentationSearchInProgress = false;
+    }
     archivePickRun.disabled = false;
   }
 }

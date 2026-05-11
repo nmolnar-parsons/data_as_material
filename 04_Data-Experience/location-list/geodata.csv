@@ -1,21 +1,51 @@
 query,id,name,latitude,longitude,elevation,country_code,country,admin1,admin2,timezone,population
-London,2643743,London,51.50853,-0.12574,25.0,GB,United Kingdom,England,Greater London,Europe/London,8961989
-Tokyo,1850147,Tokyo,35.6895,139.69171,44.0,JP,Japan,Tokyo,,Asia/Tokyo,9733276
-Moscow,524901,Moscow,55.75204,37.61781,155.0,RU,Russia,Moscow,,Europe/Moscow,10381222
-Beijing,1816670,Beijing,39.9075,116.39723,49.0,CN,China,Beijing Municipality,Beijing,Asia/Shanghai,18960744
-Sydney,2147714,Sydney,-33.86785,151.20732,58.0,AU,Australia,New South Wales,,Australia/Sydney,5557233
-Cape Town,3369157,Cape Town,-33.92584,18.42322,25.0,ZA,South Africa,Western Cape,City of Cape Town,Africa/Johannesburg,4772846
-Rio de Janeiro,3451190,Rio de Janeiro,-22.90642,-43.18223,12.0,BR,Brazil,Rio de Janeiro,Rio de Janeiro,America/Sao_Paulo,6747815
-Lagos,2332459,Lagos,6.45407,3.39467,11.0,NG,Nigeria,Lagos,,Africa/Lagos,15388000
-Berlin,2950159,Berlin,52.52437,13.41053,74.0,DE,Germany,State of Berlin,,Europe/Berlin,3426354
-Madrid,3117735,Madrid,40.4165,-3.70256,665.0,ES,Spain,Madrid,Madrid,Europe/Madrid,3255944
-Rome,3169070,Rome,41.89193,12.51133,20.0,IT,Italy,Lazio,Province of Rome,Europe/Rome,2318895
-Istanbul,745044,Istanbul,41.01384,28.94966,39.0,TR,Republic of Türkiye,Istanbul,,Europe/Istanbul,15701602
-Dubai,292223,Dubai,25.07725,55.30927,24.0,AE,United Arab Emirates,Dubai,,Asia/Dubai,3790000
-Singapore,1880252,Singapore,1.28967,103.85007,23.0,SG,Singapore,,,Asia/Singapore,5638700
-Paris,2988507,Paris,48.85341,2.3488,42.0,FR,France,Île-de-France Region,Paris Department,Europe/Paris,2138551
-Casablanca,2553604,Casablanca,33.58831,-7.61138,27.0,MA,Morocco,Casablanca-Settat,Casablanca,Africa/Casablanca,3665954
-Nairobi,184745,Nairobi,-1.28333,36.81667,1684.0,KE,Kenya,Nairobi County,,Africa/Nairobi,4397073
-Buenos Aires,3435910,Buenos Aires,-34.61315,-58.37723,31.0,AR,Argentina,Buenos Aires F.D.,,America/Argentina/Buenos_Aires,2891082
-Dakar,2253354,Dakar,14.6937,-17.44406,12.0,SN,Senegal,Dakar,,Africa/Dakar,2646503
-Lima,3936456,Lima,-12.04318,-77.02824,152.0,PE,Peru,Lima Province,,America/Lima,7737002
+New York City,5128581,New York,40.71427,-74.00597,10.0,US,United States,New York,,America/New_York,8804190
+Chicago,4887398,Chicago,41.85003,-87.65005,179.0,US,United States,Illinois,Cook,America/Chicago,2664452
+Los Angeles,5368361,Los Angeles,34.05223,-118.24368,89.0,US,United States,California,Los Angeles,America/Los_Angeles,3820914
+Washington,4140963,Washington D.C.,38.89511,-77.03637,7.0,US,United States,District of Columbia,,America/New_York,689545
+Dallas,4684888,Dallas,32.78306,-96.80667,128.0,US,United States,Texas,Dallas,America/Chicago,1326087
+San Francisco,5391959,San Francisco,37.77493,-122.41942,16.0,US,United States,California,San Francisco County,America/Los_Angeles,827526
+Miami,4164138,Miami,25.77427,-80.19366,2.0,US,United States,Florida,Miami-Dade County,America/New_York,487014
+Seattle,5809844,Seattle,47.60621,-122.33207,56.0,US,United States,Washington,King,America/Los_Angeles,780995
+Boston,4930956,Boston,42.35843,-71.05977,14.0,US,United States,Massachusetts,Suffolk,America/New_York,653833
+Denver,5419384,Denver,39.73915,-104.9847,1609.0,US,United States,Colorado,Denver,America/Denver,729019
+Houston,4699066,Houston,29.76328,-95.36327,12.0,US,United States,Texas,Harris County,America/Chicago,2314157
+Phoenix,5308655,Phoenix,33.44838,-112.07404,331.0,US,United States,Arizona,Maricopa,America/Phoenix,1650070
+Portland,5746545,Portland,45.52345,-122.67621,12.0,US,United States,Oregon,Multnomah,America/Los_Angeles,652503
+Philadelphia,4560349,Philadelphia,39.95238,-75.16362,12.0,US,United States,Pennsylvania,Philadelphia,America/New_York,1573916
+Honolulu,5856195,Honolulu,21.30694,-157.85834,5.0,US,United States,Hawaii,Honolulu County,Pacific/Honolulu,350964
+Salt Lake City,5780993,Salt Lake City,40.76078,-111.89105,1299.0,US,United States,Utah,Salt Lake,America/Denver,215548
+Nashville,4644585,Nashville,36.16589,-86.78444,170.0,US,United States,Tennessee,Davidson,America/Chicago,689447
+Oklahoma City,4544349,Oklahoma City,35.46756,-97.51643,366.0,US,United States,Oklahoma,Oklahoma,America/Chicago,681054
+Las Vegas,5506956,Las Vegas,36.17497,-115.13722,610.0,US,United States,Nevada,Clark,America/Los_Angeles,641903
+Baltimore,4347778,Baltimore,39.29038,-76.61219,10.0,US,United States,Maryland,Baltimore,America/New_York,585708
+Kansas City,4393217,Kansas City,39.09973,-94.57857,274.0,US,United States,Missouri,Jackson County,America/Chicago,475378
+Omaha,5074472,Omaha,41.25626,-95.94043,323.0,US,United States,Nebraska,Douglas,America/Chicago,486051
+Minneapolis,5037649,Minneapolis,44.97997,-93.26384,253.0,US,United States,Minnesota,Hennepin,America/Chicago,410939
+Cleveland,5150529,Cleveland,41.4995,-81.69541,199.0,US,United States,Ohio,Cuyahoga,America/New_York,365379
+Toronto,6167865,Toronto,43.70643,-79.39864,161.0,CA,Canada,Ontario,,America/Toronto,2794356
+Ottawa,6094817,Ottawa,45.41117,-75.69812,71.0,CA,Canada,Ontario,Ottawa,America/Toronto,1017449
+Halifax,6324729,Halifax,44.64269,-63.57688,60.0,CA,Canada,Nova Scotia,Halifax Regional Municipality,America/Halifax,471559
+Mexico City,3530597,Mexico City,19.42847,-99.12766,2240.0,MX,Mexico,Mexico City,,America/Mexico_City,12294193
+Havana,3553478,Havana,23.13302,-82.38304,41.0,CU,Cuba,Havana,,America/Havana,2163824
+Montreal,6077243,Montreal,45.50884,-73.58781,216.0,CA,Canada,Quebec,Montréal,America/Toronto,1762949
+Tijuana,3981609,Tijuana,32.5027,-117.00371,97.0,MX,Mexico,Baja California,Tijuana,America/Tijuana,1922523
+Panama City,3703443,Panama City,8.9936,-79.51973,17.0,PA,Panama,Provincia de Panamá,Panamá District,America/Panama,408168
+Puebla,3521081,Puebla City,19.04778,-98.20723,2166.0,MX,Mexico,Puebla,Puebla,America/Mexico_City,1692181
+Guatemala City,3598132,Guatemala City,14.64072,-90.51327,1508.0,GT,Guatemala,Guatemala,Municipio de Guatemala,America/Guatemala,994938
+Port-au-Prince,3718426,Port-au-Prince,18.54349,-72.33881,27.0,HT,Haiti,Ouest,Arrondissement de Port-au-Prince,America/Port-au-Prince,1234742
+Monterrey,3995465,Monterrey,25.68435,-100.31721,560.0,MX,Mexico,Nuevo León,Monterrey,America/Monterrey,1135512
+Tegucigalpa,3600949,Tegucigalpa,14.0818,-87.20681,944.0,HN,Honduras,Francisco Morazán Department,Distrito Central,America/Tegucigalpa,850848
+Santo Domingo,3492908,Santo Domingo,18.47186,-69.89232,24.0,DO,Dominican Republic,Nacional,Santo Domingo De Guzmán,America/Santo_Domingo,2201941
+Quebec,6325494,Québec,46.81228,-71.21454,54.0,CA,Canada,Quebec,Capitale-Nationale,America/Toronto,531902
+Kingston,3489854,Kingston,17.99702,-76.79358,65.0,JM,Jamaica,Kingston,,America/Jamaica,937700
+Vancouver,6173331,Vancouver,49.24966,-123.11934,70.0,CA,Canada,British Columbia,Metro Vancouver Regional District,America/Vancouver,662248
+Calgary,5913490,Calgary,51.05011,-114.08529,1048.0,CA,Canada,Alberta,Calgary,America/Edmonton,1306784
+Anchorage,5879400,Anchorage,61.21806,-149.90028,31.0,US,United States,Alaska,Anchorage Municipality,America/Anchorage,289600
+Fairbanks,5861897,Fairbanks,64.83778,-147.71638,136.0,US,United States,Alaska,Fairbanks North Star,America/Anchorage,32325
+Edmonton,5946768,Edmonton,53.55014,-113.46871,668.0,CA,Canada,Alberta,Edmonton,America/Edmonton,1010899
+Tucson,5318313,Tucson,32.22174,-110.92648,759.0,US,United States,Arizona,Pima,America/Phoenix,542629
+Helena,5656882,Helena,46.59271,-112.03611,1237.0,US,United States,Montana,Lewis and Clark County,America/Denver,32091
+Salt Lake City,5780993,Salt Lake City,40.76078,-111.89105,1299.0,US,United States,Utah,Salt Lake,America/Denver,215548
+Nassau,3571824,Nassau,25.05823,-77.34306,5.0,BS,Bahamas,New Providence,,America/Nassau,227940
+San Salvador,3583361,San Salvador,13.68935,-89.18718,653.0,SV,El Salvador,San Salvador Department,,America/El_Salvador,525990
