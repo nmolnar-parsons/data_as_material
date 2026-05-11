@@ -1,0 +1,2 @@
+04_Data-Experience/weather-data/normalized/*.csv filter=lfs diff=lfs merge=lfs -text
+04_Data-Experience/weather-data/normalized/*.json filter=lfs diff=lfs merge=lfs -text
