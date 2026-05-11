@@ -3,6 +3,10 @@ const TOP_N_PRESENTATION = 20;
 const SCALER_PATH = "./weather-data/normalized/scaler_params.json";
 const NORMALIZED_CSV_PATH = "./weather-data/normalized/combined_weather_normalized.csv";
 const RAW_CSV_PATH = "./weather-data/combined/weather_history.csv";
+const GITHUB_MEDIA_BASE_URL =
+  "https://media.githubusercontent.com/media/nmolnar-parsons/data_as_material/main/data_as_material/04_Data-Experience";
+const SCALER_LFS_URL = `${GITHUB_MEDIA_BASE_URL}/weather-data/normalized/scaler_params.json`;
+const NORMALIZED_CSV_LFS_URL = `${GITHUB_MEDIA_BASE_URL}/weather-data/normalized/combined_weather_normalized.csv`;
 const WORLD_ATLAS_PATH = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json";
 const OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
 const PRESENTATION_ROW_CYCLE_MS = 900;
@@ -2127,20 +2131,41 @@ function renderDebug(engineered, vector, featureCols, lat, lon) {
   debugOutput.textContent = parts.join("\n");
 }
 
+function isGitLfsPointer(text) {
+  return String(text || "").trimStart().startsWith("version https://git-lfs.github.com/spec/v1");
+}
+
+async function fetchTextOrThrow(path, label) {
+  const response = await fetch(path);
+  if (!response.ok) {
+    throw new Error(`Could not load ${label} at ${path}.`);
+  }
+  return response.text();
+}
+
+async function fetchTextWithLfsFallback(path, label, lfsUrl = null) {
+  const text = await fetchTextOrThrow(path, label);
+  if (!isGitLfsPointer(text)) {
+    return text;
+  }
+  if (!lfsUrl) {
+    throw new Error(`${label} at ${path} is a Git LFS pointer, not the actual data file.`);
+  }
+  const fallbackText = await fetchTextOrThrow(lfsUrl, `${label} fallback`);
+  if (isGitLfsPointer(fallbackText)) {
+    throw new Error(`${label} fallback at ${lfsUrl} is also a Git LFS pointer.`);
+  }
+  return fallbackText;
+}
+
 async function loadScalerConfig() {
   if (scalerConfigCache) {
     return scalerConfigCache;
   }
   if (!scalerConfigPromise) {
-    scalerConfigPromise = fetch(SCALER_PATH)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Could not load scaler JSON at ${SCALER_PATH}.`);
-        }
-        return response.text();
-      })
+    scalerConfigPromise = fetchTextWithLfsFallback(SCALER_PATH, "scaler JSON", SCALER_LFS_URL)
       .then((jsonText) => {
-        if (jsonText.trimStart().startsWith("version https://git-lfs.github.com/spec/v1")) {
+        if (isGitLfsPointer(jsonText)) {
           return SCALER_CONFIG_FALLBACK;
         }
         return JSON.parse(jsonText);
@@ -2150,8 +2175,9 @@ async function loadScalerConfig() {
         return scalerConfigCache;
       })
       .catch((error) => {
-        scalerConfigPromise = null;
-        throw error;
+        console.warn("Using embedded scaler config fallback.", error);
+        scalerConfigCache = SCALER_CONFIG_FALLBACK;
+        return scalerConfigCache;
       });
   }
   return scalerConfigPromise;
@@ -2162,13 +2188,11 @@ async function loadHistoryRows() {
     return historyRowsCache;
   }
   if (!historyRowsPromise) {
-    historyRowsPromise = fetch(NORMALIZED_CSV_PATH)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Could not load normalized CSV at ${NORMALIZED_CSV_PATH}.`);
-        }
-        return response.text();
-      })
+    historyRowsPromise = fetchTextWithLfsFallback(
+      NORMALIZED_CSV_PATH,
+      "normalized CSV",
+      NORMALIZED_CSV_LFS_URL
+    )
       .then((csvText) => {
         historyRowsCache = parseCsv(csvText);
         return historyRowsCache;
@@ -2186,13 +2210,7 @@ async function loadRawHistoryRows() {
     return rawHistoryRowsCache;
   }
   if (!rawHistoryRowsPromise) {
-    rawHistoryRowsPromise = fetch(RAW_CSV_PATH)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Could not load raw history CSV at ${RAW_CSV_PATH}.`);
-        }
-        return response.text();
-      })
+    rawHistoryRowsPromise = fetchTextWithLfsFallback(RAW_CSV_PATH, "raw history CSV")
       .then((csvText) => {
         rawHistoryRowsCache = parseCsv(csvText);
         rawHistoryIndexCache = new Map(rawHistoryRowsCache.map((row) => [makeHistoryKey(row), row]));
