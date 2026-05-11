@@ -4,7 +4,7 @@ const SCALER_PATH = "./weather-data/normalized/scaler_params.json";
 const NORMALIZED_CSV_PATH = "./weather-data/normalized/combined_weather_normalized.csv";
 const RAW_CSV_PATH = "./weather-data/combined/weather_history.csv";
 const GITHUB_MEDIA_BASE_URL =
-  "https://media.githubusercontent.com/media/nmolnar-parsons/data_as_material/main/data_as_material/04_Data-Experience";
+  "https://media.githubusercontent.com/media/nmolnar-parsons/data_as_material/main/04_Data-Experience";
 const SCALER_LFS_URL = `${GITHUB_MEDIA_BASE_URL}/weather-data/normalized/scaler_params.json`;
 const NORMALIZED_CSV_LFS_URL = `${GITHUB_MEDIA_BASE_URL}/weather-data/normalized/combined_weather_normalized.csv`;
 const WORLD_ATLAS_PATH = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json";
