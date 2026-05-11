@@ -2,9 +2,3 @@
 .env.*
 !.env.example
 04_Data-Experience/.env
-04_Data-Experience/weather-data/normalized/combined_weather_normalized.csv
-04_Data-Experience/weather-data/normalized/combined_weather_normalized.json
-04_Data-Experience/weather-data/normalized/combined_weather_normalized.csv
-04_Data-Experience/weather-data/normalized/combined_weather_normalized.csv
-04_Data-Experience/weather-data/normalized/combined_weather_normalized.csv
-04_Data-Experience/weather-data/normalized/combined_weather_normalized.csv
